@@ -20,6 +20,8 @@ namespace UPBank.Models
          * Através da API de Agency será possivel resgatar a Agency desse funcionário através desse atributo AgencyNumber (que será salvo no banco de dados de Employee) 
          * e popular o atributo Agency.
          * 
+         * A annotation [NotMapped] serve para que, ao rodar a migration, o .Net não tente criar a tabela Agency.
+         * 
          * Se não forem usar Entity Framework, podem ignorar esse [NotMapped] e [JsonIgnore]
          */
     }

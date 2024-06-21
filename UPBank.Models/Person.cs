@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UPBank.Models
 {
@@ -11,6 +12,8 @@ namespace UPBank.Models
         public double Salary { get; set; }
         public string Phone {  get; set; }
         public string Email { get; set; }
+
+        [NotMapped]
         public Address Address { get; set; }
 
         [JsonIgnore]
@@ -21,8 +24,12 @@ namespace UPBank.Models
          * tenha a chave do endereço aqui no Person para que vcs consigam pegar o endereço
          * na api e depois colocar o resposta da api com o endereço no atributo Address.
          * 
+         * A annotation [NotMapped] serve para que, ao rodar a migration, o .Net não tente criar a tabela Address.
+         * 
          * A annotation [JsonIgnore] é pra que quando vcs forem listar no controller ele 
          * não mostre esse campo, pois não é necessário
+         * 
+         * Se não forem usar Entity Framework, podem ignorar as annotations [NotMapped] e [JsonIgnore]
          */
     }
 }
