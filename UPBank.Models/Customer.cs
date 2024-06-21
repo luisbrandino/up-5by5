@@ -1,6 +1,6 @@
 ﻿namespace UPBank.Models
 {
-    public class Client : Person
+    public class Customer : Person
     {
         public bool Restriction = true;
     }
