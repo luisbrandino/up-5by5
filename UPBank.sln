@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Accounts", "UPBank.Accounts\UPBank.Accounts.csproj", "{585D1182-8BDE-4AC9-8976-90F19FBB2F9B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Customers", "UPBank.Customers\UPBank.Customers.csproj", "{CE97095F-A01C-494D-B119-41221C5BADBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Employees", "UPBank.Employees\UPBank.Employees.csproj", "{1F3D1969-ECEC-4DA0-BE87-72530DC7C8C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Addresses", "UPBank.Addresses\UPBank.Addresses.csproj", "{592C9635-F2FA-4DD9-A671-CFD5FAAF649F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Agencies", "UPBank.Agencies\UPBank.Agencies.csproj", "{1969C5CB-000E-4ACB-8807-9BFE80334E19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPBank.Models", "UPBank.Models\UPBank.Models.csproj", "{3715DFB2-134E-4EAF-903A-62CF850A3663}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPBank.Tests", "UPBank.Tests\UPBank.Tests.csproj", "{799F5DA3-4262-437B-9604-2BA8BE589CF6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{585D1182-8BDE-4AC9-8976-90F19FBB2F9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{585D1182-8BDE-4AC9-8976-90F19FBB2F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{585D1182-8BDE-4AC9-8976-90F19FBB2F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{585D1182-8BDE-4AC9-8976-90F19FBB2F9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE97095F-A01C-494D-B119-41221C5BADBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE97095F-A01C-494D-B119-41221C5BADBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE97095F-A01C-494D-B119-41221C5BADBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE97095F-A01C-494D-B119-41221C5BADBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F3D1969-ECEC-4DA0-BE87-72530DC7C8C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F3D1969-ECEC-4DA0-BE87-72530DC7C8C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F3D1969-ECEC-4DA0-BE87-72530DC7C8C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F3D1969-ECEC-4DA0-BE87-72530DC7C8C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{592C9635-F2FA-4DD9-A671-CFD5FAAF649F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{592C9635-F2FA-4DD9-A671-CFD5FAAF649F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{592C9635-F2FA-4DD9-A671-CFD5FAAF649F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{592C9635-F2FA-4DD9-A671-CFD5FAAF649F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1969C5CB-000E-4ACB-8807-9BFE80334E19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1969C5CB-000E-4ACB-8807-9BFE80334E19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1969C5CB-000E-4ACB-8807-9BFE80334E19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1969C5CB-000E-4ACB-8807-9BFE80334E19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3715DFB2-134E-4EAF-903A-62CF850A3663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3715DFB2-134E-4EAF-903A-62CF850A3663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3715DFB2-134E-4EAF-903A-62CF850A3663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3715DFB2-134E-4EAF-903A-62CF850A3663}.Release|Any CPU.Build.0 = Release|Any CPU
+		{799F5DA3-4262-437B-9604-2BA8BE589CF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{799F5DA3-4262-437B-9604-2BA8BE589CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{799F5DA3-4262-437B-9604-2BA8BE589CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{799F5DA3-4262-437B-9604-2BA8BE589CF6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F2EAA365-5B0E-4B3F-92B7-D145765EDB6A}
+	EndGlobalSection
+EndGlobal
