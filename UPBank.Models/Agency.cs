@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace UPBank.Models
 {
     public class Agency
     {
+        [Key]
         public string Number { get; set; }
         public string Cnpj { get; set; }
         public bool Restriction { get; set; }
@@ -18,6 +20,7 @@ namespace UPBank.Models
          * Através da API de Employee será possivel resgatar todos employees dessa agência e popular o atributo Employees
          */
 
+        [NotMapped]
         public Address Address { get; set; }
 
         [JsonIgnore]
