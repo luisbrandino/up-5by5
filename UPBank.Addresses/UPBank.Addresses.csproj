@@ -10,9 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="MongoDB.Driver" Version="2.26.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UPBank.DTOs\UPBank.DTOs.csproj" />
     <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
   </ItemGroup>
 

@@ -1,7 +1,7 @@
 using UPBank.Addresses.PostalServices;
 using UPBank.Addresses.PostalServices.Abstract;
 
-namespace UPBank.Tests
+namespace UPBank.Tests.Addresses
 {
     public class ViaCepServiceTest
     {

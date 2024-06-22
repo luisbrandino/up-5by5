@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using UPBank.Addresses.Mongo.Repositories;
+using UPBank.Addresses.PostalServices.Abstract;
+using UPBank.DTOs;
+using UPBank.Models;
 
 namespace UPBank.Addresses.Controllers
 {
@@ -8,36 +10,64 @@ namespace UPBank.Addresses.Controllers
     [ApiController]
     public class AddressesController : ControllerBase
     {
-        // GET: api/<AddressesController>
+        private readonly AddressRepository _repository;
+        private readonly IPostalAddressService _service;
+
+        public AddressesController(AddressRepository repository, IPostalAddressService service)
+        {
+            _repository = repository;
+            _service = service;
+        }
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<Address>>> Get()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _repository.Find());
         }
 
-        // GET api/<AddressesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("zipcode/{zipcode}")]
+        public async Task<ActionResult<Address>> Get(string zipcode)
         {
-            return "value";
+            var address = await _repository.Find(zipcode);
+
+            if (address == null)
+                return NotFound();
+
+            return Ok(address);
         }
 
-        // POST api/<AddressesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Address>> Post(AddressDTO addressDTO)
         {
+            bool addressExists = await AddressExistsAsync(addressDTO);
+
+            if (addressExists)
+                return Conflict("Endereço já cadastrado");
+
+            IAddressResult? result = await _service.Fetch(addressDTO.Zipcode);
+
+            if (result == null)
+                return BadRequest();
+
+            var address = new Address
+            {
+                Complement = addressDTO.Complement,
+                Number = addressDTO.Number,
+                Zipcode = result.Zipcode,
+                State = result.State,
+                Street = result.Street,
+                City = result.City,
+                Neighborhood = result.Neighborhood,
+            };
+
+            _repository.Insert(address);
+
+            return address;
         }
 
-        // PUT api/<AddressesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<bool> AddressExistsAsync(AddressDTO addressDTO)
         {
-        }
-
-        // DELETE api/<AddressesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return (await _repository.Find(addressDTO.Zipcode)) != null;
         }
     }
 }
