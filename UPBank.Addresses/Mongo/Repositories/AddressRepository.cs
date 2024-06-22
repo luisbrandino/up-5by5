@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using System.Text.RegularExpressions;
 using UPBank.Addresses.Mongo.Settings;
 using UPBank.Models;
 
@@ -28,6 +29,12 @@ namespace UPBank.Addresses.Mongo.Repositories
             return await (await _collection.FindAsync(_ => true)).ToListAsync();
         }
 
-        private string ParseZipcode(string zipcode) => $"{zipcode.Substring(0, 5)}-{zipcode.Substring(5)}";
+        private string ParseZipcode(string zipcode)
+        {
+            if (Regex.IsMatch(zipcode, @"^\d{5}-\d{3}$"))
+                return zipcode;
+
+            return $"{zipcode.Substring(0, 5)}-{zipcode.Substring(5)}";
+        }
     }
 }
