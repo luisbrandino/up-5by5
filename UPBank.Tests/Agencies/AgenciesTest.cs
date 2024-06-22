@@ -102,7 +102,8 @@ namespace UPBank.Tests.Agencies
             using (var context = new UPBankAgenciesContext(options))
             {
                 var controller = new AgenciesController(context);
-                var agency = new Agency
+
+                var invalidAgency = new Agency
                 {
                     Number = "101",
                     Cnpj = "12345678901234",
@@ -110,11 +111,22 @@ namespace UPBank.Tests.Agencies
                     AddressZipcode = "12345678"
                 };
 
-                await controller.PostAgency(agency);
+                var validAgency = new Agency
+                {
+                    Number = "202",
+                    Cnpj = "64478045000159",
+                    Restriction = false,
+                    AddressZipcode = "12345678"
+                };
 
-                var result = controller.GetAgency("101").Result;
+                await controller.PostAgency(invalidAgency);
+                await controller.PostAgency(validAgency);
 
-                Assert.Equal("101", result.Value.Number);
+                var invalidResult = controller.GetAgency("101").Result;
+                var validResult = controller.GetAgency("202").Result;
+
+                Assert.Null(invalidResult.Value);
+                Assert.True(validResult.Value.Cnpj == "64478045000159");
             }
         }
 
