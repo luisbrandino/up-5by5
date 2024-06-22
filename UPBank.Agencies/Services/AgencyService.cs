@@ -13,22 +13,15 @@ namespace UPBank.Agencies.Services
             var url = _Account + agencyNumber;
             List<Account> accounts = new List<Account>();
 
-            try
-            {
-                using var client = new HttpClient();
-                var response = await client.GetAsync(url);
+            using var client = new HttpClient();
+            var response = await client.GetAsync(url);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-
-                    if (!string.IsNullOrEmpty(json))
-                        accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception(ex.Message);
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(json))
+                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
             }
 
             return accounts;
@@ -39,22 +32,15 @@ namespace UPBank.Agencies.Services
             var url = _Account + "####" + profile;
             List<Account> accounts = new List<Account>();
 
-            try
-            {
-                using var client = new HttpClient();
-                var response = await client.GetAsync(url);
+            using var client = new HttpClient();
+            var response = await client.GetAsync(url);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-
-                    if (!string.IsNullOrEmpty(json))
-                        accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception(ex.Message);
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(json))
+                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
             }
 
             return accounts;
@@ -65,22 +51,15 @@ namespace UPBank.Agencies.Services
             var url = _Account + "WithActiveOverdraft";
             List<Account> accounts = new List<Account>();
 
-            try
-            {
-                using var client = new HttpClient();
-                var response = await client.GetAsync(url);
+            using var client = new HttpClient();
+            var response = await client.GetAsync(url);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-
-                    if (!string.IsNullOrEmpty(json))
-                        accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception(ex.Message);
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(json))
+                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
             }
         }
     }

@@ -122,34 +122,55 @@ namespace UPBank.Agencies.Controllers
         [HttpGet("Restricteds{agencyNumber}")]
         public async Task<ActionResult<IEnumerable<Account>>> GetRestrictedAccounts(string agencyNumber)
         {
-            var accounts = await _agencyService.GetAccountsFromAgency(agencyNumber);
+            try
+            {
+                var accounts = await _agencyService.GetAccountsFromAgency(agencyNumber);
 
-            if (!accounts.Any())
-                return Problem("There are no accounts restricted!");
+                if (!accounts.Any())
+                    return Problem("There are no accounts restricted!");
 
-            return accounts.Where(a => a.Restriction).ToList();
+                return accounts.Where(a => a.Restriction).ToList();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("ByProfile{profile}")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(EProfile profile)
         {
-            var accounts = await _agencyService.GetAccountsByProfile(profile);
+            try
+            {
+                var accounts = await _agencyService.GetAccountsByProfile(profile);
 
-            if (!accounts.Any())
-                return Problem("There are no accounts that match this profile!");
+                if (!accounts.Any())
+                    return Problem("There are no accounts that match this profile!");
 
-            return (ActionResult)accounts;
+                return (ActionResult)accounts;
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("WithActiveOverdraft")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveOverdraft()
         {
-            var accounts = await _agencyService.GetAccountsWithActiveOverdraft();
+            try
+            {
+                var accounts = await _agencyService.GetAccountsWithActiveOverdraft();
 
-            if (!accounts.Any())
-                return Problem("There are no accounts with active overdraft!");
+                if (!accounts.Any())
+                    return Problem("There are no accounts with active overdraft!");
 
-            return (ActionResult)accounts;
+                return (ActionResult)accounts;
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         private bool AgencyExists(string id) => (_context.Agency?.Any(e => e.Number == id)).GetValueOrDefault();
