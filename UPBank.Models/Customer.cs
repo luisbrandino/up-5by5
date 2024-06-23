@@ -28,7 +28,7 @@ namespace UPBank.Models
                 Salary = @Salary,
                 Phone = @Phone,
                 Email = @Email,
-                Address = @Address,
+                Address = @Address
             WHERE Cpf = @Cpf";
 
         public static readonly string MoveToDeletedCustomer = @"

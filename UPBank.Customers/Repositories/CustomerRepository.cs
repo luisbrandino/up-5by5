@@ -141,7 +141,7 @@ namespace UPBank.Customers.Repositories
 
                 await Console.Out.WriteLineAsync(rowsAffected.ToString());
 
-                return customer; 
+                return customer;
             }
         }
 
@@ -221,19 +221,19 @@ namespace UPBank.Customers.Repositories
 
                     var rowsAffected = connection.Execute(Customer.UpdateCustomer, new
                     {
-                        Cpf = updatedCustomer.Cpf,
                         Name = updatedCustomer.Name,
-                        BirthDate = updatedCustomer.BirthDate,
                         Gender = updatedCustomer.Gender,
                         Salary = updatedCustomer.Salary,
                         Phone = updatedCustomer.Phone,
                         Email = updatedCustomer.Email,
-                        Address = updatedCustomer.Address,
-                        Restriction = updatedCustomer.Restriction
+                        Address = updatedCustomer.Address.Zipcode,
+                        Cpf = updatedCustomer.Cpf
+
                     });
 
                     connection.Close();
 
+                    await Console.Out.WriteLineAsync(rowsAffected.ToString());
                     return rowsAffected > 0;
                 }
                 catch (Exception ex)
@@ -254,5 +254,5 @@ namespace UPBank.Customers.Repositories
         }
     }
 }
-   
+
 

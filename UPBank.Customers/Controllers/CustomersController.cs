@@ -69,12 +69,16 @@ namespace UPBank.Customers.Controllers
         [HttpPut("{cpf}")] // PUT: /api/customers/140.846.310-51
         public async Task<IActionResult> EditCustomer(string cpf, CustomersDTO dto)
         {
+            var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
+            dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
+
             if (cpf != dto.Cpf)
             {
                 return BadRequest();
             }
 
             var result = await _customerService.EditCustomer(dto);
+
             if (!result)
             {
                 return NotFound();
