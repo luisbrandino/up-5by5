@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using UPBank.DTOs;
 
 namespace UPBank.Models
 {
@@ -17,7 +18,7 @@ namespace UPBank.Models
         public Address Address { get; set; }
 
         [JsonIgnore]
-        public string AddressZipcode { get; set; }
+        public string? AddressZipcode { get; set; }
 
         /* 
          * Como vocês vão ter que pegar endereço de outro banco de dados, é preciso que 
@@ -31,5 +32,20 @@ namespace UPBank.Models
          * 
          * Se não forem usar Entity Framework, podem ignorar as annotations [NotMapped] e [JsonIgnore]
          */
+
+        public Person() { }
+
+        public Person(PersonsDTO dto)
+        {
+            Cpf = dto.Cpf;
+            Name = dto.Name;
+            BirthDate = dto.BirthDate;
+            Gender = dto.Gender;
+            Salary = dto.Salary;
+            Phone = dto.Phone;
+            Email = dto.Email;
+            Address = new Address { Zipcode = dto.Address };
+        }
+
     }
 }

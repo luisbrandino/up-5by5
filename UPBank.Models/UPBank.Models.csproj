@@ -8,9 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Bson" Version="2.26.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UPBank.DTOs\UPBank.DTOs.csproj" />
     <ProjectReference Include="..\UPBank.Enums\UPBank.Enums.csproj" />
   </ItemGroup>
 
