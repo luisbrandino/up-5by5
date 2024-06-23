@@ -83,10 +83,12 @@ namespace UPBank.Customers.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{cpf}")] // PUT: /api/customers/140.846.310-51
+        [HttpDelete("{cpf}")] // DELETE: /api/customers/140.846.310-51
         public async Task<ActionResult<Customer>> DeleteCustomer(string cpf)
         {
-            var customer = await _customerService.DeleteCustomer(cpf);
+            var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
+
+            var customer = await _customerService.DeleteCustomer(trateCPF);
             if (customer == null)
             {
                 return NotFound();
@@ -94,10 +96,12 @@ namespace UPBank.Customers.Controllers
             return customer;
         }
 
-        [HttpPatch("{cpf}/changerestriction")] // PATCH: /api/customers/140.846.310-51/changerestriction
+        [HttpPatch("{cpf}/changerestriction")] // PATCH: /api/customers/140.846.310-51 
         public async Task<IActionResult> ChangeRestriction(string cpf)
         {
-            var result = await _customerService.ChangeRestriction(cpf);
+            var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
+
+            var result = await _customerService.ChangeRestriction(trateCPF);
             if (!result)
             {
                 return NotFound();
