@@ -12,4 +12,13 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UPBank.DTOs\UPBank.DTOs.csproj" />
+    <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
+  </ItemGroup>
+
 </Project>
