@@ -43,6 +43,7 @@ namespace UPBank.Customers.Services
             Customer updatedCustomer = new Customer(dto);
             updatedCustomer.Address = returnAddress(dto.Address);
 
+           
             return await _customerRepository.EditCustomer(updatedCustomer);
         }
 
@@ -62,6 +63,11 @@ namespace UPBank.Customers.Services
 
             var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
             addressReturn.Zipcode = zipcode;
+
+            if(addressReturn == null)
+            {
+                return null;
+            }
             return addressReturn;
         }
 

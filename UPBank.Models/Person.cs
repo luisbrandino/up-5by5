@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using UPBank.DTOs;
 
@@ -6,6 +7,7 @@ namespace UPBank.Models
 {
     public abstract class Person
     {
+        [Key]
         public string Cpf {  get; set; }
         public string Name { get; set; }
         public DateTime BirthDate { get; set; }

@@ -24,6 +24,8 @@ namespace UPBank.Customers.Repositories
             using var connection = new SqlConnection(_conn);
             connection.Open();
 
+            var queryResult = connection.Query<dynamic>(Customer.SelectAllCustomers).ToList();
+
             var t1 = ApiConsume<List<Address>>.Get(_addressUri, "/api/addresses");
 
             var addressResult = t1.Result;
@@ -31,16 +33,16 @@ namespace UPBank.Customers.Repositories
             if (addressResult == null)
                 return null;
 
-            foreach (dynamic row in connection.Query<dynamic>(Customer.SelectAllCustomers).ToList())
+            foreach (dynamic row in queryResult)
             {
                 Customer costumer = new()
                 {
-                    Cpf = row.Cpf,
+                    Cpf = FormatCpf(row.Cpf),
                     Name = row.Name,
                     BirthDate = row.BirthDate,
-                    Gender = row.Gender,
-                    Salary = row.Salay,
-                    Phone = row.Phone,
+                    Gender = Convert.ToChar(row.Gender),
+                    Salary = Convert.ToDouble(row.Salary),
+                    Phone = FormatPhone(row.Phone),
                     Email = row.Email,
                     Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
                     Restriction = row.Restriction,
@@ -69,15 +71,15 @@ namespace UPBank.Customers.Repositories
             {
                 Customer costumer = new()
                 {
-                    Cpf = row.Cpf,
+                    Cpf = FormatCpf(row.Cpf),
                     Name = row.Name,
                     BirthDate = row.BirthDate,
-                    Gender = row.Gender,
-                    Salary = row.Salay,
-                    Phone = row.Phone,
+                    Gender = Convert.ToChar(row.Gender),
+                    Salary = Convert.ToDouble(row.Salary),
+                    Phone = FormatPhone(row.Phone),
                     Email = row.Email,
                     Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
-                    Restriction = row.Restriction,
+                    Restriction = row.Restriction
                 };
 
                 list.Add(costumer);
@@ -104,15 +106,15 @@ namespace UPBank.Customers.Repositories
 
             Customer custumer = new()
             {
-                Cpf = row.Cpf,
+                Cpf = FormatCpf(row.Cpf),
                 Name = row.Name,
                 BirthDate = row.BirthDate,
-                Gender = row.Gender,
-                Salary = row.Salay,
-                Phone = row.Phone,
+                Gender = Convert.ToChar(row.Gender),
+                Salary = Convert.ToDouble(row.Salary),
+                Phone = FormatPhone(row.Phone),
                 Email = row.Email,
                 Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
-                Restriction = row.Restriction,
+                Restriction = row.Restriction
             };
 
             return custumer;
@@ -171,7 +173,6 @@ namespace UPBank.Customers.Repositories
                 }
             }
         }
-
 
         public async Task<bool> ChangeRestriction(string cpf)
         {
@@ -240,6 +241,15 @@ namespace UPBank.Customers.Repositories
             }
         }
 
+        private string FormatCpf(string cpf)
+        {
+            return $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}";
+        }
+
+        private string FormatPhone(string phone)
+        {
+            return $"({phone.Substring(0, 2)}) {phone.Substring(2, 5)}-{phone.Substring(7, 4)}";
+        }
     }
 }
    

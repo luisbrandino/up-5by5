@@ -8,5 +8,7 @@ namespace UPBank.DTOs
 {
     public class CustomersDTO : PersonsDTO
     {
+        public bool Restriction { get; set; }
+
     }
 }

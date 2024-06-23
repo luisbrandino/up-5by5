@@ -24,7 +24,7 @@ namespace UPBank.Customers.Controllers
             var customers = await _customerService.GetAll();
             if (customers == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Customer not found." });
             }
             return customers;
         }
@@ -32,7 +32,9 @@ namespace UPBank.Customers.Controllers
         [HttpGet("{cpf}")] // GET: /api/customers/140.846.310-51
         public async Task<ActionResult<Customer>> GetCustomerByCpf(string cpf)
         {
-            var customer = await _customerService.GetByCpf(cpf);
+            var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
+
+            var customer = await _customerService.GetByCpf(trateCPF);
             if (customer == null)
             {
                 return NotFound();
@@ -43,6 +45,13 @@ namespace UPBank.Customers.Controllers
         [HttpPost] // POST: /api/customers
         public async Task<ActionResult<Customer>> PostCustomer(CustomersDTO dto)
         {
+            dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
+            dto.Phone = new string(dto.Phone.Where(char.IsDigit).ToArray());
+
+            if (dto.Address.All(char.IsDigit))
+            {
+                dto.Address = dto.Address.Insert(dto.Address.Length - 3, "-");
+            }
 
             if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
                 return BadRequest();
