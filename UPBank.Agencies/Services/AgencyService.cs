@@ -61,6 +61,8 @@ namespace UPBank.Agencies.Services
                 if (!string.IsNullOrEmpty(json))
                     accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
             }
+
+            return accounts;
         }
     }
 }
