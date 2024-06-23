@@ -2,7 +2,6 @@
 using Microsoft.Data.SqlClient;
 using UPBank.Models;
 using UPBank.Models.Utils;
-using static System.Net.WebRequestMethods;
 
 namespace UPBank.Customers.Repositories
 {
@@ -89,7 +88,7 @@ namespace UPBank.Customers.Repositories
         public async Task<Customer> GetByCPF(string cpf)
         {
             var list = new List<Customer>();
-            using var connection = new SqlConnection(_conn);
+            var connection = new SqlConnection(_conn);
             connection.Open();
 
             dynamic? row = connection.Query<dynamic>(Customer.SelectCustomerByCpf, new { Cpf = cpf }).FirstOrDefault();
@@ -122,11 +121,12 @@ namespace UPBank.Customers.Repositories
 
         public async Task<Customer> PostCustomer(Customer customer)
         {
+
             using (var connection = new SqlConnection(_conn))
             {
                 connection.Open();
 
-                connection.Execute(Customer.InsertCustomer, new
+                int rowsAffected = await connection.ExecuteAsync(Customer.InsertCustomer, new
                 {
                     Cpf = customer.Cpf,
                     Name = customer.Name,
@@ -135,14 +135,16 @@ namespace UPBank.Customers.Repositories
                     Salary = customer.Salary,
                     Phone = customer.Phone,
                     Email = customer.Email,
-                    Address = customer.Address,
+                    Address = customer.Address.Zipcode,
                     Restriction = customer.Restriction
                 });
 
+                await Console.Out.WriteLineAsync(rowsAffected.ToString());
 
-                return customer;
+                return customer; 
             }
         }
+
         public async Task<Customer> DeleteCustomer(string cpf)
         {
             using (var connection = new SqlConnection(_conn))

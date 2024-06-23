@@ -31,7 +31,7 @@ namespace UPBank.Customers.Services
 
             if (IsCustomerUnique(customer))
             {
-                _customerRepository.PostCustomer(customer);
+                await _customerRepository.PostCustomer(customer);
 
                 return customer;
             }

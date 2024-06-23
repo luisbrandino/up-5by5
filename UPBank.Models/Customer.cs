@@ -4,9 +4,8 @@ namespace UPBank.Models
 {
     public class Customer : Person
     {
-        public static readonly string InsertCustomer = @"
-            INSERT INTO Customer (Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction)
-            VALUES (@Cpf, @Name, @BirthDate, @Gender, @Salary, @Phone, @Email, @Address, @Restriction)";
+        public static readonly string InsertCustomer = "INSERT INTO Customer (Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction) " +
+            "VALUES (@Cpf, @Name, @BirthDate, @Gender, @Salary, @Phone, @Email, @Address, @Restriction)";
 
         public static readonly string SelectAllCustomers = @"
             SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
