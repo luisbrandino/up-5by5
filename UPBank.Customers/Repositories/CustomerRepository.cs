@@ -52,6 +52,38 @@ namespace UPBank.Customers.Repositories
         }
 
 
+        public async Task<List<Customer>> GetAllDeleted()
+        {
+            var list = new List<Customer>();
+            using var connection = new SqlConnection(_conn);
+            connection.Open();
+
+            var t1 = ApiConsume<List<Address>>.Get(_addressUri, "/api/addresses");
+
+            var addressResult = t1.Result;
+
+            if (addressResult == null)
+                return null;
+
+            foreach (dynamic row in connection.Query<dynamic>(Customer.SelectAllDeletedCustomers).ToList())
+            {
+                Customer costumer = new()
+                {
+                    Cpf = row.Cpf,
+                    Name = row.Name,
+                    BirthDate = row.BirthDate,
+                    Gender = row.Gender,
+                    Salary = row.Salay,
+                    Phone = row.Phone,
+                    Email = row.Email,
+                    Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
+                    Restriction = row.Restriction,
+                };
+
+                list.Add(costumer);
+            }
+            return list;
+        }
         public async Task<Customer> GetByCPF(string cpf)
         {
             var list = new List<Customer>();
@@ -207,7 +239,6 @@ namespace UPBank.Customers.Repositories
                 }
             }
         }
-
 
     }
 }

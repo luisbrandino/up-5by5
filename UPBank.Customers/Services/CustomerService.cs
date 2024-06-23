@@ -24,18 +24,37 @@ namespace UPBank.Customers.Services
             return await _customerRepository.GetByCPF(cpf);
         }
 
-        public async Task<CustomersDTO> Post(CustomersDTO dto)
+        public async Task<Customer> PostCustomer(CustomersDTO dto)
         {
             Customer customer = new Customer(dto);
             customer.Address = returnAddress(dto.Address);
 
+            if (IsCustomerUnique(customer))
+            {
+                _customerRepository.PostCustomer(customer);
 
-            _customerRepository.PostCustomer(customer);
-
-            return dto;
-
+                return customer;
+            }
+            return null;
         }
 
+        public async Task<bool> EditCustomer(CustomersDTO dto)
+        {
+            Customer updatedCustomer = new Customer(dto);
+            updatedCustomer.Address = returnAddress(dto.Address);
+
+            return await _customerRepository.EditCustomer(updatedCustomer);
+        }
+
+        public async Task<Customer> DeleteCustomer(string cpf)
+        {
+            return await _customerRepository.DeleteCustomer(cpf);
+        }
+
+        public async Task<bool> ChangeRestriction(string cpf)
+        {
+            return await _customerRepository.ChangeRestriction(cpf);
+        }
         private Address returnAddress(string zipcode)
         {
             string baseUri = "https://localhost:7004";
@@ -46,26 +65,26 @@ namespace UPBank.Customers.Services
             return addressReturn;
         }
 
-        /*      private bool ValideCustomer(Customer customer)
-              {
-                  HashSet<string> cpfLists = new HashSet<string>();
+        private bool IsCustomerUnique(Customer customer)
+        {
+            HashSet<string> cpfSet = new HashSet<string>();
 
-                  var ListSale = _saleRepository.GetSale().Result;
+            var customers = _customerRepository.GetAll().Result;
+            foreach (var cust in customers)
+            {
+                cpfSet.Add(cust.Cpf);
+            }
+
+            var deletedCustomers = _customerRepository.GetAllDeleted().Result;
+            foreach (var deletedCust in deletedCustomers)
+            {
+                cpfSet.Add(deletedCust.Cpf);
+            }
+
+            return !cpfSet.Contains(customer.Cpf);
+        }
 
 
-                  var filteredSales = ListSale.Where(s => s.Flight.Id == sale.Flight.Id).ToList();
-
-
-                  foreach (var passenger in sale.Passengers.Concat(filteredSales.SelectMany(s => s.Passengers)))
-                  {
-                      if (!cpfLists.Add(passenger.CPF))
-                      {
-                          return false;
-                      }
-                  }
-
-                  return true;
-              }*/
 
 
     }

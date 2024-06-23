@@ -12,6 +12,11 @@ namespace UPBank.Models
             SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
             FROM Customer";
 
+        public static readonly string SelectAllDeletedCustomers = @"
+            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
+            FROM DeletedCustomer";
+
+
         public static readonly string SelectCustomerByCpf = @"
             SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
             FROM Customer
