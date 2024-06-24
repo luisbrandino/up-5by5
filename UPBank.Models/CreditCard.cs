@@ -1,7 +1,10 @@
-﻿namespace UPBank.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace UPBank.Models
 {
     public class CreditCard
     {
+        [Key]
         public long Number { get; set; }
         public DateTime ExtractionDate { get; set; }
         public double Limit { get; set; }

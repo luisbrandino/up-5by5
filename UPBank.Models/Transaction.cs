@@ -12,6 +12,12 @@ namespace UPBank.Models
         public double Value;
 
         [NotMapped]
+        public Account? Origin { get; set; }
+
+        [JsonIgnore]
+        public string? OriginNumber { get; set; }
+
+        [NotMapped]
         public Account? Destiny { get; set; }
 
         [JsonIgnore]

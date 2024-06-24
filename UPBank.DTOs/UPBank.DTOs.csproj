@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UPBank.Enums\UPBank.Enums.csproj" />
+    <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
+  </ItemGroup>
+
 </Project>
