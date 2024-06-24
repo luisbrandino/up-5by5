@@ -85,9 +85,10 @@ namespace UPBank.Customers.Repositories
             }
             return list;
         }
+
+        //Alterar ( para recuperar menos dados)
         public async Task<Customer> GetByCPF(string cpf)
         {
-            var list = new List<Customer>();
             var connection = new SqlConnection(_conn);
             connection.Open();
 
@@ -96,11 +97,9 @@ namespace UPBank.Customers.Repositories
             if (row == null)
                 return null;
 
-            var t1 = ApiConsume<List<Address>>.Get(_addressUri, "/api/addresses");
+            var address = ApiConsume<Address>.Get(_addressUri, $"/api/addresses/zipcode/{row.Address}").Result;
 
-            var addressResult = t1.Result;
-
-            if (addressResult == null)
+            if (address == null)
                 return null;
 
             Customer custumer = new()
@@ -112,10 +111,10 @@ namespace UPBank.Customers.Repositories
                 Salary = Convert.ToDouble(row.Salary),
                 Phone = FormatPhone(row.Phone),
                 Email = row.Email,
-                Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
+                Address = address,
                 Restriction = row.Restriction
             };
-
+               
             return custumer;
         }
 

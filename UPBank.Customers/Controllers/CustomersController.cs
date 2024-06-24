@@ -24,7 +24,7 @@ namespace UPBank.Customers.Controllers
             var customers = await _customerService.GetAll();
             if (customers == null)
             {
-                return NotFound( "Clientes não encontrado");
+                return NotFound( "Clientes não encontrados");
             }
             return customers;
         }
@@ -46,15 +46,14 @@ namespace UPBank.Customers.Controllers
         public async Task<ActionResult<Customer>> PostCustomer(CustomersDTO dto)
         {
             if (dto == null)
-                return BadRequest();
+                return BadRequest("Nulo");
            
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             dto.Phone = new string(dto.Phone.Where(char.IsDigit).ToArray());
 
             if (dto.Address.All(char.IsDigit))
-            {
                 dto.Address = dto.Address.Insert(dto.Address.Length - 3, "-");
-            }
+            
 
             if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
                 return BadRequest("Dados Invalidos");
@@ -75,7 +74,7 @@ namespace UPBank.Customers.Controllers
             var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
 
-            if (cpf != dto.Cpf)
+            if (trateCPF != dto.Cpf)
             {
                 return BadRequest("Cpfs Diferentes");
             }
@@ -84,7 +83,7 @@ namespace UPBank.Customers.Controllers
 
             if (!result)
             {
-                return NotFound("Não encontrado o ");
+                return NotFound("Não encontrado");
             }
 
             return NoContent();
