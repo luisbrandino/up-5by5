@@ -53,8 +53,8 @@ namespace UPBank.Customers.Controllers
                 dto.Address = dto.Address.Insert(dto.Address.Length - 3, "-");
             }
 
-            /*if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
-                return BadRequest("Dados Invalidos");*/
+            if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
+                return BadRequest("Dados Invalidos");
 
             var customer = await _customerService.PostCustomer(dto);
 
