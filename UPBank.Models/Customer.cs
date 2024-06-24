@@ -44,13 +44,27 @@ namespace UPBank.Models
 
             COMMIT;";
 
+        public static readonly string RstourerCustomer = @"
+            BEGIN TRANSACTION;
+
+            INSERT INTO Customer (Cpf, [Name], BirthDate, Gender, Salary, Phone, Email, [Address], Restriction)
+            SELECT Cpf, [Name], BirthDate, Gender, Salary, Phone, Email, [Address], Restriction
+            FROM DeletedCustomer
+            WHERE Cpf = @Cpf;
+
+            DELETE FROM DeletedCustomer
+            WHERE Cpf = @Cpf;
+
+            COMMIT;";
+
         public static readonly string RemoveRestriction = "UPDATE Customer SET Restriction = 0 WHERE Cpf = @Cpf";
         public static readonly string AddRestriction = "UPDATE Customer SET Restriction = 1 WHERE Cpf = @Cpf";
         public bool Restriction { get; set; }
 
         public Customer() { }
 
-        public Customer(CustomersDTO dTO) : base (dTO) {
+        public Customer(CustomersDTO dTO) : base(dTO)
+        {
 
             Restriction = true;
         }

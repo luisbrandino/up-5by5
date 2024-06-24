@@ -145,6 +145,25 @@ namespace UPBank.Customers.Repositories
             }
         }
 
+        public async Task<Customer> RestoreCustomer(Customer customer)
+        {
+            using (var connection = new SqlConnection(_conn))
+            {
+                connection.Open();
+
+                try
+                {
+                    connection.Execute(Customer.RstourerCustomer, new { Cpf = customer.Cpf });
+                    return customer;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Erro Restaurar Cliente: " + ex.Message);
+                    return null;
+                }
+            }
+        }
+
         public async Task<Customer> DeleteCustomer(string cpf)
         {
             using (var connection = new SqlConnection(_conn))
@@ -252,6 +271,8 @@ namespace UPBank.Customers.Repositories
         {
             return $"({phone.Substring(0, 2)}) {phone.Substring(2, 5)}-{phone.Substring(7, 4)}";
         }
+
+
     }
 }
 

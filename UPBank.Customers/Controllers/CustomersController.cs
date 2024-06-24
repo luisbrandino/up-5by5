@@ -53,14 +53,14 @@ namespace UPBank.Customers.Controllers
                 dto.Address = dto.Address.Insert(dto.Address.Length - 3, "-");
             }
 
-            if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
-                return BadRequest();
+            /*if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
+                return BadRequest("Dados Invalidos");*/
 
             var customer = await _customerService.PostCustomer(dto);
 
             if (customer == null)
             {
-                return BadRequest();
+                return BadRequest("Nenhum Cliente Enviado");
             }
             return CreatedAtAction(nameof(GetCustomerByCpf), new { cpf = customer.Cpf }, customer);
         }
@@ -100,8 +100,7 @@ namespace UPBank.Customers.Controllers
             return customer;
         }
 
-        //Fazer função para Recuperar um dado Deletado;
-
+ 
 
         [HttpPatch("{cpf}/changerestriction")] // PATCH: /api/customers/140.846.310-51 
         public async Task<IActionResult> ChangeRestriction(string cpf)

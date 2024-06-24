@@ -29,6 +29,14 @@ namespace UPBank.Customers.Services
             Customer customer = new Customer(dto);
             customer.Address = returnAddress(dto.Address);
 
+            if(RestoreCustomer(customer))
+            {
+                await _customerRepository.RestoreCustomer(customer);
+
+                return customer;
+
+            }
+
             if (IsCustomerUnique(customer))
             {
                 await _customerRepository.PostCustomer(customer);
@@ -81,6 +89,13 @@ namespace UPBank.Customers.Services
                 cpfSet.Add(cust.Cpf);
             }
 
+            return !cpfSet.Contains(customer.Cpf);
+        }
+
+        private bool RestoreCustomer(Customer customer)
+        {
+            HashSet<string> cpfSet = new HashSet<string>();
+
             var deletedCustomers = _customerRepository.GetAllDeleted().Result;
             foreach (var deletedCust in deletedCustomers)
             {
@@ -88,10 +103,8 @@ namespace UPBank.Customers.Services
             }
 
             return !cpfSet.Contains(customer.Cpf);
+
         }
-
-
-
 
     }
 }
