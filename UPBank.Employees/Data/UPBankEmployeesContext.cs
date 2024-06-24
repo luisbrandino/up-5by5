@@ -19,10 +19,19 @@ namespace UPBank.Employees.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Person>()
-                .ToTable("People");
+                .ToTable("People")
+                .HasDiscriminator<string>("Discriminator")
+                .HasValue<Person>("Person")
+                .HasValue<Employee>("Employee");
+
+            modelBuilder.Entity<Employee>().HasKey(n => new { n.Cpf });
+            modelBuilder.Entity<Address>().HasKey(n => new { n.Zipcode,n.Number });
 
             modelBuilder.Entity<Employee>()
-                .HasBaseType<Person>(); 
+                .Property(e => e.Manager).HasColumnName("Manager");
+
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.AgencyNumber).HasColumnName("AgencyNumber");
         }
     }
 }

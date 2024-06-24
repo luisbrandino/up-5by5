@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +11,8 @@ using UPBank.Addresses.Controllers;
 using UPBank.Addresses.PostalServices;
 using UPBank.Addresses.PostalServices.Abstract;
 using UPBank.Employees.Data;
-using UPBank.Employees.DTO;
 using UPBank.Employees.Service;
+using UPBank.Employees.Utils;
 using UPBank.Models;
 
 namespace UPBank.Employees.Controllers
@@ -21,6 +23,7 @@ namespace UPBank.Employees.Controllers
     {
         private readonly UPBankEmployeesContext _context;
         private readonly EmployeeService _employeeService;
+        private readonly string _addressUri = "https://localhost:7004/";
 
         public EmployeesController(UPBankEmployeesContext context)
         {
@@ -29,31 +32,105 @@ namespace UPBank.Employees.Controllers
 
         // GET: api/Employees
         [HttpGet]
+        #region Teste Atual
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
         {
-          if (_context.Employee == null)
-          {
-              return NotFound();
-          }
-            return await _context.Employee.ToListAsync();
+            if (_context.Employee == null)
+            {
+                return Problem("Entity Set is null");
+            }
+
+            List<Employee> list = await _context.Employee.Include(a => a.Address).Include(a => a.Agency).ToListAsync();
+
+            return list;
         }
+        #endregion
+        #region Meu código
+        //public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
+        //{
+        //  if (_context.Employee == null)
+        //  {
+        //      return Problem("Entity Set is null");
+        //  }
+
+        //    List<Employee> list = await _context.Employee.Include(a => a.Address).Include(a => a.Agency).ToListAsync();
+
+        //    return list;
+        //}
+        #endregion
+        #region Código Luan
+        /*
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
+        {
+            if (_context.Employee == null)
+            {
+                return Problem("Entity Set is null");
+            }
+            // Recupera a lista de funcionários do banco de dados.
+            var employees = await _context.Employee.ToListAsync();
+            // Lista para armazenar os objetos Employee mapeados.
+            var mappedEmployees = new List<Employee>();
+            // Para cada funcionário, mapeia-o para um objeto Employee.
+            foreach (var employee in employees)
+            {
+                // Cria um novo objeto Employee.
+                var mappedEmployee = new Employee
+                {
+                    Cpf = employee.Cpf,
+                    Name = employee.Name,
+                };
+                // Se o funcionário tiver um endereço associado, tenta obter o endereço da API.
+                if (!string.IsNullOrEmpty(employee.AddressZipcode))
+                {
+                    // Faz a chamada à API para obter o endereço com base no código postal do funcionário.
+                    var addressResult = await ApiConsume<List<Address>>.Get(_addressUri, $"/api/addresses/{employee.AddressZipcode}");
+                    // Se o endereço for encontrado, mapeia-o para o objeto Address e atribui ao funcionário.
+                    if (addressResult != null && addressResult.Any())
+                    {
+                        var address = addressResult.First(); // Supondo que a API retorna apenas um endereço.
+                        mappedEmployee.Address = new Address
+                        {
+                            Zipcode = address.Zipcode,
+                            Street = address.Street,
+                            City = address.City,
+                            State = address.State,
+                            Neighborhood = address.Neighborhood,
+                            Number = employee.Address.Number,
+                            Complement = employee.Address.Complement
+                        };
+                    }
+                }
+                // Adiciona o objeto Employee mapeado à lista de funcionários mapeados.
+                mappedEmployees.Add(mappedEmployee);
+            }
+            return mappedEmployees;
+        }
+        */
+        #endregion
 
         // GET: api/Employees/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(string id)
+        [HttpGet("{cpf}")]
+        public async Task<ActionResult<Employee>> GetEmployee(string cpf)
         {
           if (_context.Employee == null)
           {
               return NotFound();
           }
-            var employee = await _context.Employee.FindAsync(id);
+            var employee = await _context.Employee.FindAsync(cpf);
 
-            if (employee == null)
+            if (cpf == null)
             {
                 return NotFound();
             }
 
-            return employee;
+            Employee? hiredEmployee = await _context.Employee.Include(a => a.Agency).FirstOrDefaultAsync(p => p.Cpf == cpf);
+
+            if(hiredEmployee == null)
+            {
+                return NotFound("There isn't an active hired worker with this identification");
+            }
+
+            return hiredEmployee;
         }
 
         // PUT: api/Employees/5
@@ -111,7 +188,7 @@ namespace UPBank.Employees.Controllers
                 Email = employee.Email,
                 Register = employee.Register,
                 Manager = employee.Manager,
-                // AgencyNumber = dto.AgencyNumber, // Devo manter?
+                AgencyNumber = employee.AgencyNumber, // Devo manter?
                 Agency = await _employeeService.GetAgencyAsync(employee.AgencyNumber)
             };
 
