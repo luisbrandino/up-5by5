@@ -24,7 +24,7 @@ namespace UPBank.Customers.Controllers
             var customers = await _customerService.GetAll();
             if (customers == null)
             {
-                return NotFound(new { message = "Customer not found." });
+                return NotFound( "Clientes não encontrado");
             }
             return customers;
         }
@@ -37,7 +37,7 @@ namespace UPBank.Customers.Controllers
             var customer = await _customerService.GetByCpf(trateCPF);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Cliente não encontrado");
             }
             return customer;
         }
@@ -45,6 +45,9 @@ namespace UPBank.Customers.Controllers
         [HttpPost] // POST: /api/customers
         public async Task<ActionResult<Customer>> PostCustomer(CustomersDTO dto)
         {
+            if (dto == null)
+                return BadRequest();
+           
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             dto.Phone = new string(dto.Phone.Where(char.IsDigit).ToArray());
 
@@ -74,14 +77,14 @@ namespace UPBank.Customers.Controllers
 
             if (cpf != dto.Cpf)
             {
-                return BadRequest();
+                return BadRequest("Cpfs Diferentes");
             }
 
             var result = await _customerService.EditCustomer(dto);
 
             if (!result)
             {
-                return NotFound();
+                return NotFound("Não encontrado o ");
             }
 
             return NoContent();
@@ -95,7 +98,7 @@ namespace UPBank.Customers.Controllers
             var customer = await _customerService.DeleteCustomer(trateCPF);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Cliente não encontrado");
             }
             return customer;
         }
@@ -110,7 +113,7 @@ namespace UPBank.Customers.Controllers
             var result = await _customerService.ChangeRestriction(trateCPF);
             if (!result)
             {
-                return NotFound();
+                return NotFound("Cliente não encontrado");
             }
             return NoContent();
         }

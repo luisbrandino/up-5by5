@@ -8,18 +8,14 @@ namespace UPBank.Models
             "VALUES (@Cpf, @Name, @BirthDate, @Gender, @Salary, @Phone, @Email, @Address, @Restriction)";
 
         public static readonly string SelectAllCustomers = @"
-            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
-            FROM Customer";
+            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction FROM Customer";
 
         public static readonly string SelectAllDeletedCustomers = @"
-            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
-            FROM DeletedCustomer";
+            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction FROM DeletedCustomer";
 
 
         public static readonly string SelectCustomerByCpf = @"
-            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction
-            FROM Customer
-            WHERE Cpf = @Cpf";
+            SELECT Cpf, Name, BirthDate, Gender, Salary, Phone, Email, Address, Restriction FROM Customer WHERE Cpf = @Cpf";
 
         public static readonly string UpdateCustomer = @"
             UPDATE Customer

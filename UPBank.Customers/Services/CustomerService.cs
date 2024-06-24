@@ -29,20 +29,18 @@ namespace UPBank.Customers.Services
             Customer customer = new Customer(dto);
             customer.Address = returnAddress(dto.Address);
 
-            if(RestoreCustomer(customer))
+            if (RestoreCustomer(customer))
             {
                 await _customerRepository.RestoreCustomer(customer);
-
                 return customer;
-
             }
 
             if (IsCustomerUnique(customer))
             {
                 await _customerRepository.PostCustomer(customer);
-
                 return customer;
             }
+
             return null;
         }
 
@@ -102,10 +100,8 @@ namespace UPBank.Customers.Services
                 cpfSet.Add(deletedCust.Cpf);
             }
 
-            return !cpfSet.Contains(customer.Cpf);
-
+            return cpfSet.Contains(customer.Cpf);
         }
-
     }
 }
 
