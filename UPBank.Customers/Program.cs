@@ -1,7 +1,12 @@
-using Microsoft.AspNetCore.Connections;
+﻿using Microsoft.AspNetCore.Connections;
 using UPBank.Customers.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using UPBank.Customers.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<UPBankCustomersContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("UPBankCustomersContext") ?? throw new InvalidOperationException("Connection string 'UPBankCustomersContext' not found.")));
 
 // Add services to the container.
 

@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace UPBank.Models
 {
@@ -7,6 +8,7 @@ namespace UPBank.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
+        [Key]
         public string Zipcode { get; set; }
         public int Number { get; set; }
         public string? Complement {  get; set; }

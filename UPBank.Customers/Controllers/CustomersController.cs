@@ -1,6 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using UPBank.Customers.Data;
 using UPBank.Customers.Services;
 using UPBank.DTOs;
 using UPBank.Models;
@@ -24,7 +30,7 @@ namespace UPBank.Customers.Controllers
             var customers = await _customerService.GetAll();
             if (customers == null)
             {
-                return NotFound( "Clientes não encontrado");
+                return NotFound("Clientes não encontrado");
             }
             return customers;
         }
@@ -47,7 +53,7 @@ namespace UPBank.Customers.Controllers
         {
             if (dto == null)
                 return BadRequest();
-           
+
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             dto.Phone = new string(dto.Phone.Where(char.IsDigit).ToArray());
 
@@ -103,7 +109,7 @@ namespace UPBank.Customers.Controllers
             return customer;
         }
 
- 
+
 
         [HttpPatch("{cpf}/changerestriction")] // PATCH: /api/customers/140.846.310-51 
         public async Task<IActionResult> ChangeRestriction(string cpf)
@@ -170,8 +176,8 @@ namespace UPBank.Customers.Controllers
 
         private bool ValidPhone(string phone)
         {
-            if (phone.Length != 11)           
-                return false;            
+            if (phone.Length != 11)
+                return false;
 
             return true;
         }
@@ -186,6 +192,5 @@ namespace UPBank.Customers.Controllers
             return false;
 
         }
-
     }
 }
