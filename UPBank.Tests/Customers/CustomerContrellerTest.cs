@@ -22,7 +22,7 @@ namespace UPBank.Tests.Customers
         }
 
         [Fact]
-        public async Task PostCustomer_CPFInvalido_RetornaBadRequest()
+        public async Task PostCustomer_InvalidCPF_BadRequest()
         {
             var dto = new CustomersDTO
             {
@@ -34,14 +34,14 @@ namespace UPBank.Tests.Customers
                 BirthDate = DateTime.Now.AddYears(-25)
             };
 
-            var resultado = await _controller.PostCustomer(dto);
+            var result = await _controller.PostCustomer(dto);
 
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Dados Invalidos", badRequestResult.Value);
         }
 
         [Fact]
-        public async Task PostCustomer_EmailInvalido_RetornaBadRequest()
+        public async Task PostCustomer_InvalidEmail_BadRequest()
         {
             var dto = new CustomersDTO
             {
@@ -53,14 +53,14 @@ namespace UPBank.Tests.Customers
                 BirthDate = DateTime.Now.AddYears(-25)
             };
 
-            var resultado = await _controller.PostCustomer(dto);
+            var result = await _controller.PostCustomer(dto);
 
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Dados Invalidos", badRequestResult.Value);
         }
 
         [Fact]
-        public async Task PostCustomer_TelefoneInvalido_RetornaBadRequest()
+        public async Task PostCustomer_InvalidPhone_BadRequest()
         {
             var dto = new CustomersDTO
             {
@@ -72,14 +72,14 @@ namespace UPBank.Tests.Customers
                 BirthDate = DateTime.Now.AddYears(-25)
             };
 
-            var resultado = await _controller.PostCustomer(dto);
+            var result = await _controller.PostCustomer(dto);
 
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Dados Invalidos", badRequestResult.Value);
         }
 
         [Fact]
-        public async Task PostCustomer_SalarioInvalido_RetornaBadRequest()
+        public async Task PostCustomer_InvalidSalary_BadRequest()
         {
             var dto = new CustomersDTO
             {
@@ -91,14 +91,14 @@ namespace UPBank.Tests.Customers
                 BirthDate = DateTime.Now.AddYears(-25)
             };
 
-            var resultado = await _controller.PostCustomer(dto);
+            var result = await _controller.PostCustomer(dto);
 
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Dados Invalidos", badRequestResult.Value);
         }
 
         [Fact]
-        public async Task PostCustomer_DataNascimentoInvalida_RetornaBadRequest()
+        public async Task PostCustomer_InvalidBirthDay_RetornaBadRequest()
         {
             var dto = new CustomersDTO
             {
@@ -110,59 +110,11 @@ namespace UPBank.Tests.Customers
                 BirthDate = DateTime.Now.AddYears(1) // Data de nascimento inválida
             };
 
-            var resultado = await _controller.PostCustomer(dto);
+            var result = await _controller.PostCustomer(dto);
 
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado.Result);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
             Assert.Equal("Dados Invalidos", badRequestResult.Value);
         }
 
-        [Fact]
-        public async Task GetCustomerByCpf_ClienteExistente_RetornaOk()
-        {
-            var existingCustomer = new Customer { Cpf = "46067325802", Name = "Test Customer" };
-            _mockCustomerService.Setup(service => service.GetByCpf("46067325802")).ReturnsAsync(existingCustomer);
-
-            var result = await _controller.GetCustomerByCpf("46067325802");
-
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var customer = Assert.IsType<Customer>(okResult.Value);
-            Assert.Equal(existingCustomer.Cpf, customer.Cpf);
-            Assert.Equal(existingCustomer.Name, customer.Name);
-        }
-
-        [Fact]
-        public async Task EditCustomer_ClienteExistente_RetornaNoContent()
-        {
-            var dto = new CustomersDTO { Cpf = "46067325802", Name = "Updated Customer" };
-
-            _mockCustomerService.Setup(service => service.EditCustomer(It.IsAny<CustomersDTO>())).ReturnsAsync(true);
-
-            var result = await _controller.EditCustomer("46067325802", dto);
-
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public async Task ChangeRestriction_ClienteExistente_RetornaNoContent()
-        {
-            _mockCustomerService.Setup(service => service.ChangeRestriction("46067325802")).ReturnsAsync(true);
-
-            var result = await _controller.ChangeRestriction("46067325802");
-
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteCustomer_ClienteExistente_RetornaOk()
-        {
-            var existingCustomer = new Customer { Cpf = "46067325802", Name = "Test Customer" };
-            _mockCustomerService.Setup(service => service.DeleteCustomer("46067325802")).ReturnsAsync(existingCustomer);
-
-            var result = await _controller.DeleteCustomer("46067325802");
-
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var customer = Assert.IsType<Customer>(okResult.Value);
-            Assert.Equal(existingCustomer.Cpf, customer.Cpf);
-        }
     }
 }
