@@ -11,5 +11,6 @@ namespace UPBank.Models
         public string CVV { get; set; }
         public string Holder { get; set; }
         public string Brand { get; set; }
+        public bool Active { get; set; } = false;
     }
 }

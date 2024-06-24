@@ -4,8 +4,11 @@ using UPBank.Accounts.Api.Agency;
 using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Controllers;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.Requests;
+using UPBank.Accounts.Services;
 using UPBank.Addresses.Controllers;
 using UPBank.Addresses.PostalServices;
+using UPBank.Accounts.Specifications;
 using UPBank.DTOs;
 using UPBank.Models;
 
@@ -28,8 +31,12 @@ namespace UPBank.Tests.Accounts
 
         public AccountsController Make() => new AccountsController(
                 new UPBankAccountsContext(_options),
-                new MockCustomerApi(),
-                new MockAgencyApi()
+                new AccountService(
+                    new UPBankAccountsContext(_options),
+                    new AccountCreationValidation(),
+                    new MockCustomerApi(),
+                    new MockAgencyApi()
+                )
             );
 
         [Fact]
@@ -50,6 +57,9 @@ namespace UPBank.Tests.Accounts
             var createdAccount = Assert.IsType<Account>(createdResult.Value);
             Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
             Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Account.CountAsync());
+            Assert.Equal(1, await context.AccountCustomer.CountAsync());
         }
 
         [Fact]
@@ -134,6 +144,9 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
             Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
             Assert.Equal(accountCreationDTO.Customers.Count, createdAccount.Customers.Count);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Account.CountAsync());
+            Assert.Equal(2, await context.AccountCustomer.CountAsync());
         }
 
         [Fact]
@@ -158,7 +171,7 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_ValidAccountFieldsWithDuplicateClients_ReturnsBadRequest()
+        public async Task Post_AccountWithDuplicateClients_ReturnsBadRequest()
         {
             var controller = Make();
 

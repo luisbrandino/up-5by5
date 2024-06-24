@@ -8,6 +8,7 @@ namespace UPBank.DTOs
         public double Overdraft { get; set; }
         public EProfile Profile { get; set; }
         public string AgencyNumber { get; set; }
-        public List<string> Customers { get; set; } // only CPF
+        public bool IsSavingsAccount { get; set; } = false;
+        public List<string> Customers { get; set; } // apenas CPF
     }
 }

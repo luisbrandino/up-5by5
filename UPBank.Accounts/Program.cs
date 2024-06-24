@@ -5,6 +5,7 @@ using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<UPBankAccountsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UPBankAccountsContext") ?? throw new InvalidOperationException("Connection string 'UPBankAccountsContext' not found.")));
@@ -17,6 +18,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddSingleton<ICustomerApi, MockCustomerApi>();
 builder.Services.AddSingleton<IAgencyApi, MockAgencyApi>();
+builder.Services.AddSingleton<AccountService>();
 
 var app = builder.Build();
 

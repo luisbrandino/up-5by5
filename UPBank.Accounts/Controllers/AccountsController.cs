@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.Services;
 using UPBank.DTOs;
 using UPBank.Models;
 
@@ -18,16 +20,15 @@ namespace UPBank.Accounts.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly UPBankAccountsContext _context;
-        private readonly ICustomerApi _customer;
-        private readonly IAgencyApi _agency;
+        private readonly AccountService _service;
 
-        public AccountsController(UPBankAccountsContext context, ICustomerApi customer, IAgencyApi agency)
+        public AccountsController(UPBankAccountsContext context, AccountService service)
         {
             _context = context;
-            _customer = customer;
-            _agency = agency;
+            _service = service;
         }
 
+        /*
         // GET: api/Accounts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
@@ -36,7 +37,15 @@ namespace UPBank.Accounts.Controllers
           {
               return NotFound();
           }
-            return await _context.Account.ToListAsync();
+            List<Account> accounts = await _context.Account.ToListAsync();
+
+            foreach (var account in accounts)
+            {
+                string number = account.AgencyNumber;
+                account.Agency = await _agency.Get(number);
+            }
+
+            return accounts;
         }
 
         // GET: api/Accounts/5
@@ -58,6 +67,7 @@ namespace UPBank.Accounts.Controllers
 
             return account;
         }
+        */
 
         // PUT: api/Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -90,76 +100,17 @@ namespace UPBank.Accounts.Controllers
             return NoContent();
         }
 
-        public void ValidateCreationRequest(Account account)
-        {
-            if (account.Agency == null)
-                throw new Exception("Agência não cadastrada");
-
-            if (account.Customers.Any(customer => customer == null))
-                throw new Exception("Cliente não cadastrado");
-
-            if (account.Customers.Count > 2)
-                throw new Exception("Uma conta pode ter no máximo dois clientes");
-
-            if (account.Customers.Count != account.Customers.Distinct().Count())
-                throw new Exception("Não pode haver clientes repetidos");
-
-            Customer firstCustomer = account.Customers.First();
-
-            int age = DateTime.Today.Year - firstCustomer.BirthDate.Year;
-
-            if (firstCustomer.BirthDate > DateTime.Today.AddYears(-age))
-                age--;
-
-            if (age <= 18)
-                throw new Exception("O primeiro cliente da conta deve ser maior de idade");
-        }
-
         [HttpPost]
-        public async Task<ActionResult<Account>> Post(AccountCreationDTO account)
+        public async Task<ActionResult<Account>> Post(AccountCreationDTO requestedAccount)
         {
-            Agency? agency = await _agency.Get(account.AgencyNumber);
-
-            var tasks = account.Customers.Select(cpf => _customer.Get(cpf));
-            List<Customer?> customers = (await Task.WhenAll(tasks)).ToList();
-
-            Account createdAccount = new Account
-            {
-                Number = "100001",
-                Overdraft = 3333,
-                Agency = agency,
-                AgencyNumber = agency?.Number,
-                Customers = customers,
-                Profile = account.Profile,
-                CreationDate = DateTime.Now,
-                Balance = 2000,
-                Restriction = true,
-                CreditCard = null,
-                CreditCardNumber = null
-            };
-
             try
             {
-                ValidateCreationRequest(createdAccount);
-            } catch (Exception ex)
+                return await _service.Create(requestedAccount);
+            } 
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(e.Message);
             }
-
-            account.Customers.ForEach(cpf =>
-            {
-                AccountCustomer accountCustomer = new AccountCustomer
-                {
-                    AccountNumber = createdAccount.Number,
-                    CustomerCpf = cpf
-                };
-
-                // add accountcustomers
-            });
-
-            // add account
-            
-            return createdAccount;
         }
 
         // DELETE: api/Accounts/5
