@@ -82,6 +82,36 @@ namespace UPBank.Accounts.Services
             return account;
         }
 
+        public async Task<Account> ChangeProfile(string number, EProfile profile)
+        {
+            var account = await GetRaw(number);
+
+            if (account == null)
+                return null;
+
+            account.Profile = profile;
+
+            _context.Entry(account).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return account;
+        }
+
+        public async Task<Account> Activate(string number)
+        {
+            var account = await GetRaw(number);
+
+            if (account == null)
+                return null;
+
+            account.Restriction = false;
+
+            _context.Entry(account).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return account;
+        }
+
         public async Task<CreditCard> ActivateCreditCard(string accountNumber)
         {
             return await _creditCardService.Activate(await GetCreditCard(accountNumber));

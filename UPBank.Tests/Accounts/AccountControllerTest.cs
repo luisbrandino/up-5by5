@@ -699,6 +699,30 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
+        public async Task Post_ActivateAccount_ReturnsActivatedAccount()
+        {
+            var controller = Make();
+
+            var activatedResult = await controller.Activate("123456789");
+
+            var activatedAccount = Assert.IsType<Account>(activatedResult.Value);
+            Assert.False(activatedAccount.Restriction);
+            var context = new UPBankAccountsContext(_options);
+            Assert.False((await context.Account.FindAsync("123456789")).Restriction);
+        }
+
+        [Fact]
+        public async Task Post_ActivateAccountNotInDatabase_ReturnsNotFound()
+        {
+            var controller = Make();
+
+            var activatedResult = await controller.Activate("123456dd789");
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(activatedResult.Result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+        }
+
+        [Fact]
         public async Task Post_ActivateCreditCard_ReturnsCreditCard()
         {
             var controller = Make();
@@ -750,7 +774,7 @@ namespace UPBank.Tests.Accounts
         {
             var controller = Make();
 
-            var accountResult = await controller.GetTransactionsByType("123456789", EType.Deposit);
+            var accountResult = await controller.GetTransactionsByType("123456789", (int)EType.Deposit);
 
             var transactions = Assert.IsType<List<Transaction>>(accountResult.Value);
             Assert.Equal(1, transactions.Count);
@@ -764,7 +788,7 @@ namespace UPBank.Tests.Accounts
         {
             var controller = Make();
 
-            var accountResult = await controller.GetTransactionsByType("123456789", EType.Loan);
+            var accountResult = await controller.GetTransactionsByType("123456789", (int)EType.Loan);
 
             var transactions = Assert.IsType<List<Transaction>>(accountResult.Value);
             Assert.Equal(0, transactions.Count);
@@ -775,7 +799,7 @@ namespace UPBank.Tests.Accounts
         {
             var controller = Make();
 
-            var accountResult = await controller.GetTransactionsByType("3493290", EType.Deposit);
+            var accountResult = await controller.GetTransactionsByType("3493290", (int)EType.Deposit);
 
             var notFoundResult = Assert.IsType<NotFoundResult>(accountResult.Result);
             Assert.Equal(404, notFoundResult.StatusCode);

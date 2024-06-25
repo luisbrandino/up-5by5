@@ -2,8 +2,8 @@
 {
     public enum EProfile
     {
-        University,
-        Normal,
-        Vip
+        University = 1,
+        Normal = 2,
+        Vip = 3
     }
 }

@@ -65,8 +65,9 @@ namespace UPBank.Accounts.Controllers
         }
 
         [HttpGet("{number}/transactions/{type}")]
-        public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, EType transactionType)
+        public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, int type)
         {
+            var transactionType = (EType)type;
             try
             {
                 var transactions = await _service.GetTransactionsByType(number, transactionType);
@@ -147,6 +148,24 @@ namespace UPBank.Accounts.Controllers
             return NoContent();
         }
 
+        [HttpPut("{number}/profile")]
+        public async Task<ActionResult<Account>> ChangeProfile(string number, ChangeProfileDTO profile)
+        {
+            try
+            {
+                var account = await _service.ChangeProfile(number, profile.Profile);
+
+                if (account == null)
+                    return NotFound();
+
+                return account;
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<Account>> Post(AccountCreationDTO requestedAccount)
         {
@@ -154,6 +173,24 @@ namespace UPBank.Accounts.Controllers
             {
                 return await _service.Create(requestedAccount);
             } 
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("{number}/activate")]
+        public async Task<ActionResult<Account>> Activate(string number)
+        {
+            try
+            {
+                var account = await _service.Activate(number);
+
+                if (account == null)
+                    return NotFound();
+
+                return account;
+            }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
@@ -174,7 +211,7 @@ namespace UPBank.Accounts.Controllers
         }
 
         [HttpPost("{number}/transactions")]
-        [ServiceFilter(typeof(PopulateOriginNumberActionFilter))]
+        [ServiceFilter(typeof(AddNumberOriginToTransactionFilter), Order = int.MinValue)]
         public async Task<ActionResult<Transaction>> MakeTransaction(TransactionCreationDTO requestedTransaction)
         {
             try
