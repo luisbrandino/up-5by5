@@ -14,6 +14,7 @@ namespace UPBank.Accounts.Services
     {
         private readonly UPBankAccountsContext _context;
         private readonly CreditCardService _creditCardService;
+        private readonly TransactionService _transactionService;
         private readonly ICustomerApi _customer;
         private readonly IAgencyApi _agency;
 
@@ -189,6 +190,22 @@ namespace UPBank.Accounts.Services
                 account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
                 account.Customers = customers;
                 account.Agency = agency;
+            }
+
+            return accounts;
+        }
+
+        public async Task<IEnumerable<Account>> GetAccountsWithActiveLoan()
+        {
+            var activeLoans = await new TransactionService(_context, this).GetActiveLoans();
+            var accounts = new List<Account>();
+
+            foreach (var activeLoan in activeLoans)
+            {
+                if (accounts.Any(account => account.Number == activeLoan.OriginNumber))
+                    continue;
+
+                accounts.Add(await Get(activeLoan.OriginNumber));
             }
 
             return accounts;

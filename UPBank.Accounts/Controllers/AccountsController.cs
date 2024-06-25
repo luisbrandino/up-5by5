@@ -90,6 +90,19 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
+        [HttpGet("activeloans")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveLoan()
+        {
+            try
+            {
+                return (await _service.GetAccountsWithActiveLoan()).ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("{number}/transactions/{type}")]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, int type)
         {
