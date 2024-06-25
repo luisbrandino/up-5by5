@@ -17,9 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Models", "UPBank.Mod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Tests", "UPBank.Tests\UPBank.Tests.csproj", "{799F5DA3-4262-437B-9604-2BA8BE589CF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPBank.Enums", "UPBank.Enums\UPBank.Enums.csproj", "{23A8D419-726F-4E3C-8BDF-25E4461757E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.Enums", "UPBank.Enums\UPBank.Enums.csproj", "{23A8D419-726F-4E3C-8BDF-25E4461757E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPBank.DTOs", "UPBank.DTOs\UPBank.DTOs.csproj", "{3AFDAAD9-3CB7-4043-ABB7-2734D60803C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UPBank.DTOs", "UPBank.DTOs\UPBank.DTOs.csproj", "{3AFDAAD9-3CB7-4043-ABB7-2734D60803C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

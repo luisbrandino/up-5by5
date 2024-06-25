@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UPBank.Accounts.Data;
 
@@ -11,9 +12,10 @@ using UPBank.Accounts.Data;
 namespace UPBank.Accounts.Migrations
 {
     [DbContext(typeof(UPBankAccountsContext))]
-    partial class UPBankAccountsContextModelSnapshot : ModelSnapshot
+    [Migration("20240624210704_CreateCreditCardTable")]
+    partial class CreateCreditCardTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,35 +104,6 @@ namespace UPBank.Accounts.Migrations
                     b.HasKey("Number");
 
                     b.ToTable("CreditCard");
-                });
-
-            modelBuilder.Entity("UPBank.Models.Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("DestinyNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OriginNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Value")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Transaction");
                 });
 #pragma warning restore 612, 618
         }

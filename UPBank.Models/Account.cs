@@ -14,12 +14,13 @@ namespace UPBank.Models
         public EProfile Profile { get; set; }
         public DateTime CreationDate { get; set; }
         public double Balance { get; set; }
+        public string? SavingsAccount { get; set; } // Conta poupança, opcional
 
         [NotMapped]
         public CreditCard CreditCard { get; set; }
 
         [JsonIgnore]
-        public string CreditCardNumber { get; set; }
+        public long CreditCardNumber { get; set; }
 
         [NotMapped]
         public Agency Agency { get; set; }
