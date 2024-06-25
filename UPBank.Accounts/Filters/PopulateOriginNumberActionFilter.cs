@@ -10,8 +10,8 @@ namespace UPBank.Accounts.Filters
             if (context.ActionArguments.TryGetValue("requestedTransaction", out object? requestedTransactionObj) &&
             requestedTransactionObj is TransactionCreationDTO requestedTransaction)
             {
-                if (context.RouteData.Values.TryGetValue("id", out object? idObj) && idObj is string id)
-                    requestedTransaction.OriginNumber = id;
+                if (context.RouteData.Values.TryGetValue("number", out object? numberObj) && numberObj is string number)
+                    requestedTransaction.OriginNumber = number;
             }
 
             await next();

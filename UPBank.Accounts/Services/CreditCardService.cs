@@ -1,5 +1,7 @@
 ﻿using UPBank.Accounts.Data;
 using UPBank.Models;
+using Microsoft.EntityFrameworkCore;
+using UPBank.Accounts.Specifications;
 
 namespace UPBank.Accounts.Services
 {
@@ -34,6 +36,19 @@ namespace UPBank.Accounts.Services
         }
 
         public string GenerateCardVerificationValue() => new Random().Next(1, 999).ToString("000");
+
+        public async Task<CreditCard> Activate(CreditCard creditCard)
+        {
+            new CreditCardActivationValidation().Validate(creditCard);
+
+            creditCard.Active = true;
+
+            _context.Entry(creditCard).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+            return creditCard;
+        }
 
         public async Task<CreditCard> Create(string holder)
         {

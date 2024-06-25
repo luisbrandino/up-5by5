@@ -34,6 +34,17 @@ namespace UPBank.Tests.Accounts
                 Restriction = true
             });
 
+            context.CreditCard.Add(new CreditCard
+            {
+                Number = 2020,
+                CVV = "101",
+                Brand = "Visa",
+                Active = true,
+                ExtractionDate = DateTime.Now,
+                Holder = "Um cara ai",
+                Limit = 1500
+            });
+
             context.Account.Add(new Account
             {
                 Overdraft = 1000,
@@ -44,6 +55,17 @@ namespace UPBank.Tests.Accounts
                 CreditCardNumber = 1111,
                 Balance = 1111,
                 Restriction = true
+            });
+
+            context.CreditCard.Add(new CreditCard
+            {
+                Number = 1111,
+                CVV = "131",
+                Brand = "MasterCard",
+                Active = false,
+                ExtractionDate = DateTime.Now,
+                Holder = "Dois cara ai",
+                Limit = 1750
             });
 
             context.SaveChanges();
@@ -88,7 +110,7 @@ namespace UPBank.Tests.Accounts
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
-            Assert.Equal(1, await context.CreditCard.CountAsync());
+            Assert.Equal(3, await context.CreditCard.CountAsync());
         }
 
         [Fact]
@@ -197,7 +219,7 @@ namespace UPBank.Tests.Accounts
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(2, await context.AccountCustomer.CountAsync());
-            Assert.Equal(1, await context.CreditCard.CountAsync());
+            Assert.Equal(3, await context.CreditCard.CountAsync());
         }
 
         [Fact]
@@ -624,6 +646,45 @@ namespace UPBank.Tests.Accounts
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(1, await context.Transaction.CountAsync());
             Assert.Equal(3000, (await context.Account.FindAsync("123456789")).Balance);
+        }
+
+        [Fact]
+        public async Task Post_ActivateCreditCardAccountNotInDatabase_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var createdResult = await controller.ActivateCreditCard("130847981347");
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta não cadastrada", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_ActivateCreditCardAlreadyActive_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var createdResult = await controller.ActivateCreditCard("123456789");
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Cartão de crédito já está ativado", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_ActivateCreditCard_ReturnsCreditCard()
+        {
+            var controller = Make();
+
+            var activatedCreditCardResult = await controller.ActivateCreditCard("505020");
+
+            var creditCardActivated = Assert.IsType<CreditCard>(activatedCreditCardResult.Value);
+            Assert.True(creditCardActivated.Active);
+            var context = new UPBankAccountsContext(_options);
+            Assert.True((await context.CreditCard.FindAsync(1111)).Active);
         }
     }
 }

@@ -113,7 +113,20 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpPost("{id}/transactions")]
+        [HttpPost("{number}/creditcard/activate")]
+        public async Task<ActionResult<CreditCard>> ActivateCreditCard(string number)
+        {
+            try
+            {
+                return await _service.ActivateCreditCard(number);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("{number}/transactions")]
         [ServiceFilter(typeof(PopulateOriginNumberActionFilter))]
         public async Task<ActionResult<Transaction>> MakeTransaction(TransactionCreationDTO requestedTransaction)
         {

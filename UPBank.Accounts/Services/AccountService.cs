@@ -1,4 +1,5 @@
-﻿using UPBank.Accounts.Api.Agency.Abstract;
+﻿using Microsoft.EntityFrameworkCore;
+using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
 using UPBank.Accounts.Specifications;
@@ -55,7 +56,7 @@ namespace UPBank.Accounts.Services
         {
             Account account = await MakeFromRequestedAccount(requestedAccount);
 
-            new AccountCreationValidation().Validate(account);
+            new AccountCreationValidation(this).Validate(account);
 
             account.CreditCard = await _creditCardService.Create(account.Customers.First().Name);
             account.CreditCardNumber = account.CreditCard.Number;
@@ -77,10 +78,26 @@ namespace UPBank.Accounts.Services
             return account;
         }
 
+        public async Task<CreditCard> ActivateCreditCard(string accountNumber)
+        {
+            return await _creditCardService.Activate(await GetCreditCard(accountNumber));
+        }
+
+        public async Task<CreditCard?> GetCreditCard(string accountNumber)
+        {
+            var account = await GetRaw(accountNumber);
+
+            if (account == null)
+                return null;
+
+            return await _context.CreditCard.FirstOrDefaultAsync(creditCard => creditCard.Number == account.CreditCardNumber);
+        }
+
         public async Task<Account?> GetRaw(string number)
         {
             return await _context.Account.FindAsync(number);
         }
 
+        public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
     }
 }
