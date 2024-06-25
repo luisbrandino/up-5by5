@@ -19,6 +19,7 @@ namespace UPBank.Customers.Repositories
 
         public async Task<List<Customer>> GetAll()
         {
+
             var list = new List<Customer>();
             using var connection = new SqlConnection(_conn);
             connection.Open();
@@ -30,7 +31,7 @@ namespace UPBank.Customers.Repositories
             var addressResult = t1.Result;
 
             if (addressResult == null)
-                return null;
+                throw new Exception("Erro ao obter dados de endereço");
 
             foreach (dynamic row in queryResult)
             {
@@ -50,6 +51,7 @@ namespace UPBank.Customers.Repositories
                 list.Add(costumer);
             }
             return list;
+
         }
 
 
@@ -64,7 +66,7 @@ namespace UPBank.Customers.Repositories
             var addressResult = t1.Result;
 
             if (addressResult == null)
-                return null;
+                throw new Exception("Erro ao obter dados de endereço");
 
             foreach (dynamic row in connection.Query<dynamic>(Customer.SelectAllDeletedCustomers).ToList())
             {
@@ -95,12 +97,12 @@ namespace UPBank.Customers.Repositories
             dynamic? row = connection.Query<dynamic>(Customer.SelectCustomerByCpf, new { Cpf = cpf }).FirstOrDefault();
 
             if (row == null)
-                return null;
+                throw new Exception("Erro ao obter cliente");
 
             var address = ApiConsume<Address>.Get(_addressUri, $"/api/addresses/zipcode/{row.Address}").Result;
 
             if (address == null)
-                return null;
+                throw new Exception("Erro ao obter dados de endereço");
 
             Customer custumer = new()
             {
@@ -114,7 +116,7 @@ namespace UPBank.Customers.Repositories
                 Address = address,
                 Restriction = row.Restriction
             };
-               
+
             return custumer;
         }
 
@@ -157,8 +159,7 @@ namespace UPBank.Customers.Repositories
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Erro Restaurar Cliente: " + ex.Message);
-                    return null;
+                    throw new Exception("Erro Restaurar Cliente");
                 }
             }
         }
@@ -170,16 +171,12 @@ namespace UPBank.Customers.Repositories
                 connection.Open();
 
                 var costumer = GetByCPF(cpf).Result;
+
                 if (costumer == null)
-                {
-                    return null;
-                }
+                    throw new Exception("Erro recuperar Cliente");
 
                 if (!costumer.Restriction)
-                {
-                    Console.WriteLine("Cliente não possui restrições.");
-                    return null;
-                }
+                    throw new Exception("Cliente não possui restrições");
 
                 try
                 {
@@ -188,8 +185,7 @@ namespace UPBank.Customers.Repositories
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Erro Deletar Cliente: " + ex.Message);
-                    return null;
+                    throw new Exception("Erro Deletar Cliente");
                 }
             }
         }
@@ -203,7 +199,7 @@ namespace UPBank.Customers.Repositories
                     var costumer = GetByCPF(cpf).Result;
 
                     if (costumer == null)
-                        return false;
+                        throw new Exception("Erro ao recuperar Cliente");
 
                     connection.Open();
 
@@ -216,11 +212,11 @@ namespace UPBank.Customers.Repositories
                     if (rowsAffected > 0)
                         return true;
                     else
-                        return false;
+                        throw new Exception("Nenhuma linha afetada");
                 }
                 catch (Exception ex)
                 {
-                    return false;
+                    throw new Exception("Erro ao mudar restrição");
                 }
             }
         }
@@ -256,7 +252,7 @@ namespace UPBank.Customers.Repositories
                 }
                 catch (Exception ex)
                 {
-                    return false;
+                    throw new Exception("Erro ao editar");
                 }
             }
         }

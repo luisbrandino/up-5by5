@@ -21,25 +21,40 @@ namespace UPBank.Customers.Controllers
         [HttpGet] // GET: /api/customers
         public async Task<ActionResult<List<Customer>>> GetAllCustomers()
         {
-            var customers = await _customerService.GetAll();
-            if (customers == null)
+            try
             {
-                return NotFound( "Clientes não encontrados");
+                var customers = await _customerService.GetAll();
+                if (customers == null)
+                {
+                    return NotFound("Clientes não encontrados");
+                }
+                return customers;
+
             }
-            return customers;
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{cpf}")] // GET: /api/customers/140.846.310-51
         public async Task<ActionResult<Customer>> GetCustomerByCpf(string cpf)
         {
             var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
-
-            var customer = await _customerService.GetByCpf(trateCPF);
-            if (customer == null)
+            try
             {
-                return NotFound("Cliente não encontrado");
+                var customer = await _customerService.GetByCpf(trateCPF);
+                if (customer == null)
+                {
+                    return NotFound("Cliente não encontrado");
+                }
+                return customer;
             }
-            return customer;
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost] // POST: /api/customers
@@ -47,30 +62,39 @@ namespace UPBank.Customers.Controllers
         {
             if (dto == null)
                 return BadRequest("Nulo");
-           
+
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             dto.Phone = new string(dto.Phone.Where(char.IsDigit).ToArray());
 
             if (dto.Address.All(char.IsDigit))
                 dto.Address = dto.Address.Insert(dto.Address.Length - 3, "-");
-            
 
             if (!ValidCPF(dto.Cpf) || !ValidEmail(dto.Email) || !ValidPhone(dto.Phone) || !validSalary(dto.Salary) || !validBirthDay(dto.BirthDate))
                 return BadRequest("Dados Invalidos");
 
-            var customer = await _customerService.PostCustomer(dto);
-
-            if (customer == null)
+            try
             {
-                return BadRequest("Nenhum Cliente Enviado");
+               
+                var customer = await _customerService.PostCustomer(dto);
+
+                if (customer == null)
+                {
+                    return BadRequest("Nenhum Cliente Enviado");
+                }
+                return CreatedAtAction(nameof(GetCustomerByCpf), new { cpf = customer.Cpf }, customer);
             }
-            return CreatedAtAction(nameof(GetCustomerByCpf), new { cpf = customer.Cpf }, customer);
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
 
         [HttpPut("{cpf}")] // PUT: /api/customers/140.846.310-51
         public async Task<IActionResult> EditCustomer(string cpf, CustomersDTO dto)
         {
+
             var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
 
@@ -78,15 +102,22 @@ namespace UPBank.Customers.Controllers
             {
                 return BadRequest("Cpfs Diferentes");
             }
-
-            var result = await _customerService.EditCustomer(dto);
-
-            if (!result)
+            try
             {
-                return NotFound("Não encontrado");
+                var result = await _customerService.EditCustomer(dto);
+
+                if (!result)
+                {
+                    return NotFound("Não encontrado");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
         }
 
         [HttpDelete("{cpf}")] // DELETE: /api/customers/140.846.310-51
@@ -94,27 +125,41 @@ namespace UPBank.Customers.Controllers
         {
             var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
 
-            var customer = await _customerService.DeleteCustomer(trateCPF);
-            if (customer == null)
+            try
             {
-                return NotFound("Cliente não encontrado");
+                var customer = await _customerService.DeleteCustomer(trateCPF);
+                if (customer == null)
+                {
+                    return NotFound("Cliente não encontrado");
+                }
+                return customer;
             }
-            return customer;
-        }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
- 
+        }
 
         [HttpPatch("{cpf}/changerestriction")] // PATCH: /api/customers/140.846.310-51 
         public async Task<IActionResult> ChangeRestriction(string cpf)
         {
             var trateCPF = new string(cpf.Where(char.IsDigit).ToArray());
 
-            var result = await _customerService.ChangeRestriction(trateCPF);
-            if (!result)
+            try
             {
-                return NotFound("Cliente não encontrado");
+                var result = await _customerService.ChangeRestriction(trateCPF);
+                if (!result)
+                {
+                    return NotFound("Cliente não encontrado");
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         private bool ValidCPF(string cpf)
@@ -169,8 +214,8 @@ namespace UPBank.Customers.Controllers
 
         private bool ValidPhone(string phone)
         {
-            if (phone.Length != 11)           
-                return false;            
+            if (phone.Length != 11)
+                return false;
 
             return true;
         }

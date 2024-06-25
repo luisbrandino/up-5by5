@@ -42,7 +42,7 @@ namespace UPBank.Customers.Services
                 return customer;
             }
 
-            return null;
+            throw new Exception("Usuario já está cadastrado");
         }
 
         public async Task<bool> EditCustomer(CustomersDTO dto)
@@ -73,7 +73,7 @@ namespace UPBank.Customers.Services
 
             if(addressReturn == null)
             {
-                return null;
+                throw new Exception("Erro ao recuperar Endereço");
             }
             return addressReturn;
         }
