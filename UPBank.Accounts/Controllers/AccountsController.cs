@@ -158,33 +158,22 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(string id, Account account)
+        [HttpPut("{number}")]
+        public async Task<ActionResult<Account>> PutAccount(string number, UpdateAccountDTO account)
         {
-            if (id != account.Number)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(account).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                var updatedAccount = await _service.Update(number, account);
 
-            return NoContent();
+                if (updatedAccount == null)
+                    return NotFound();
+
+                return updatedAccount;
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPut("{number}/profile")]

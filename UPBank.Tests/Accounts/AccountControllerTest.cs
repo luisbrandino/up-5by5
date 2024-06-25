@@ -97,7 +97,6 @@ namespace UPBank.Tests.Accounts
             var accountService = new AccountService(
                     context,
                     new CreditCardService(context),
-                    new TransactionService(context),
                     new MockCustomerApi(),
                     new MockAgencyApi()
                 );

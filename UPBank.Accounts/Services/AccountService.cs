@@ -82,6 +82,28 @@ namespace UPBank.Accounts.Services
             return account;
         }
 
+        public async Task<Account?> Update(string number, UpdateAccountDTO requestedAccount)
+        {
+            var account = await GetRaw(number);
+
+            if (account == null)
+                return null;
+
+            if (requestedAccount.Overdraft != null)
+                account.Overdraft = (double) requestedAccount.Overdraft;
+
+            if (requestedAccount.Balance != null)
+                account.Balance = (double) requestedAccount.Balance;
+
+            new AccountUpdatingValidation().Validate(account);
+
+            _context.Entry(account).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+            return account;
+        }
+
         public async Task<Account> ChangeProfile(string number, EProfile profile)
         {
             var account = await GetRaw(number);
