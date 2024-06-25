@@ -10,14 +10,14 @@ namespace UPBank.Accounts.Services
     public class AccountService
     {
         private readonly UPBankAccountsContext _context;
-        private readonly AccountCreationValidation _creationValidation;
+        private readonly CreditCardService _creditCardService;
         private readonly ICustomerApi _customer;
         private readonly IAgencyApi _agency;
 
-        public AccountService(UPBankAccountsContext context, AccountCreationValidation creationValidation, ICustomerApi customer, IAgencyApi agency)
+        public AccountService(UPBankAccountsContext context, CreditCardService creditCardService, ICustomerApi customer, IAgencyApi agency)
         {
+            _creditCardService = creditCardService;
             _context = context;
-            _creationValidation = creationValidation;
             _customer = customer;
             _agency = agency;
         }
@@ -44,8 +44,6 @@ namespace UPBank.Accounts.Services
                 CreationDate = DateTime.Now,
                 Balance = 2000,
                 Restriction = true,
-                CreditCard = new CreditCard(),
-                CreditCardNumber = "0002"
             };
 
             account.SavingsAccount = requestedAccount.IsSavingsAccount ? $"{account.Number}-{GenerateSavingAccountsDigits()}" : null;
@@ -57,7 +55,10 @@ namespace UPBank.Accounts.Services
         {
             Account account = await MakeFromRequestedAccount(requestedAccount);
 
-            _creationValidation.Validate(account);
+            new AccountCreationValidation().Validate(account);
+
+            account.CreditCard = await _creditCardService.Create(account.Customers.First().Name);
+            account.CreditCardNumber = account.CreditCard.Number;
 
             account.Customers.ForEach(customer =>
             {
@@ -74,6 +75,11 @@ namespace UPBank.Accounts.Services
             await _context.SaveChangesAsync();
 
             return account;
+        }
+
+        public async Task<Account?> GetRaw(string number)
+        {
+            return await _context.Account.FindAsync(number);
         }
 
     }

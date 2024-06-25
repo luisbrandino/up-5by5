@@ -14,8 +14,10 @@ namespace UPBank.Accounts.Data
         {
         }
 
+        public DbSet<CreditCard> CreditCard { get; set; } = default!;
         public DbSet<Account> Account { get; set; } = default!;
         public DbSet<AccountCustomer> AccountCustomer { get; set; } = default!;
+        public DbSet<Transaction> Transaction { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

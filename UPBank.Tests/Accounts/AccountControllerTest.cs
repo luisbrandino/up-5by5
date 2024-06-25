@@ -4,7 +4,6 @@ using UPBank.Accounts.Api.Agency;
 using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Controllers;
 using UPBank.Accounts.Data;
-using UPBank.Accounts.Requests;
 using UPBank.Accounts.Services;
 using UPBank.Addresses.Controllers;
 using UPBank.Addresses.PostalServices;
@@ -29,15 +28,23 @@ namespace UPBank.Tests.Accounts
             context.SaveChanges();
         }
 
-        public AccountsController Make() => new AccountsController(
-                new UPBankAccountsContext(_options),
-                new AccountService(
-                    new UPBankAccountsContext(_options),
-                    new AccountCreationValidation(),
+        public AccountsController Make()
+        {
+            var context = new UPBankAccountsContext(_options);
+            var accountService = new AccountService(
+                    context,
+                    new CreditCardService(context),
                     new MockCustomerApi(),
                     new MockAgencyApi()
-                )
+                );
+
+            return new AccountsController(
+                context,
+                accountService,
+                new TransactionService(context, accountService)
             );
+
+        }
 
         [Fact]
         public async Task Post_ValidAccountFields_ReturnsCreatedAccount()
@@ -60,6 +67,7 @@ namespace UPBank.Tests.Accounts
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(1, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
+            Assert.Equal(1, await context.CreditCard.CountAsync());
         }
 
         [Fact]
@@ -147,6 +155,7 @@ namespace UPBank.Tests.Accounts
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(1, await context.Account.CountAsync());
             Assert.Equal(2, await context.AccountCustomer.CountAsync());
+            Assert.Equal(1, await context.CreditCard.CountAsync());
         }
 
         [Fact]

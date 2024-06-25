@@ -20,7 +20,7 @@ namespace UPBank.Models
         public CreditCard CreditCard { get; set; }
 
         [JsonIgnore]
-        public string CreditCardNumber { get; set; }
+        public long CreditCardNumber { get; set; }
 
         [NotMapped]
         public Agency Agency { get; set; }

@@ -33,11 +33,6 @@ namespace UPBank.Accounts.Services
             _context = context;
         }
 
-        public string GenerateCreditCardNumber()
-        {
-            return string.Empty;
-        }
-
         public string GenerateCardVerificationValue() => new Random().Next(1, 999).ToString("000");
 
         public async Task<CreditCard> Create(string holder)
@@ -62,7 +57,10 @@ namespace UPBank.Accounts.Services
             creditCard.Brand = creditCardNumberGenerator.Key;
             creditCard.Number = creditCardNumberGenerator.Value.Generate();
 
-            return await Task.FromResult(creditCard);
+            _context.CreditCard.Add(creditCard);
+            await _context.SaveChangesAsync();
+
+            return creditCard;
         }
 
     }

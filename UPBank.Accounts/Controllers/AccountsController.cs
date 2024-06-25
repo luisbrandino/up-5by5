@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Api.Agency.Abstract;
-using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.Filters;
 using UPBank.Accounts.Services;
 using UPBank.DTOs;
 using UPBank.Models;
@@ -20,12 +20,14 @@ namespace UPBank.Accounts.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly UPBankAccountsContext _context;
+        private readonly TransactionService _transactionService;
         private readonly AccountService _service;
 
-        public AccountsController(UPBankAccountsContext context, AccountService service)
+        public AccountsController(UPBankAccountsContext context, AccountService service, TransactionService transactionService)
         {
             _context = context;
             _service = service;
+            _transactionService = transactionService;
         }
 
         /*
@@ -68,9 +70,7 @@ namespace UPBank.Accounts.Controllers
             return account;
         }
         */
-
-        // PUT: api/Accounts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(string id, Account account)
         {
@@ -113,7 +113,20 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        // DELETE: api/Accounts/5
+        [HttpPost("{id}/transactions")]
+        [ServiceFilter(typeof(PopulateOriginNumberActionFilter))]
+        public async Task<ActionResult<Transaction>> MakeTransaction(TransactionCreationDTO requestedTransaction)
+        {
+            try
+            {
+                return await _transactionService.Create(requestedTransaction);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(string id)
         {
