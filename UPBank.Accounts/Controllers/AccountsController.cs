@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.DTO;
 using UPBank.Accounts.Filters;
 using UPBank.Accounts.Services;
 using UPBank.DTOs;
+using UPBank.Enums;
 using UPBank.Models;
 
 namespace UPBank.Accounts.Controllers
@@ -132,28 +134,59 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(string id)
+        [HttpDelete("{Number}")]
+        public async Task<IActionResult> DeleteAccount(string Number)
         {
             if (_context.Account == null)
             {
-                return NotFound();
+                return NotFound("Account not found");
             }
-            var account = await _context.Account.FindAsync(id);
-            if (account == null)
+            var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                return NotFound();
+                var account = await _context.Account.FindAsync(Number);
+
+                if (account == null)
+                {
+                    return NotFound();
+                }
+
+                var deletedAccount = CreateDeletedAccountFromAccount(account);
+                _context.DeletedAccount.Add(deletedAccount);
+                _context.Account.Remove(account);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return NoContent();
+
             }
-
-            _context.Account.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         private bool AccountExists(string id)
         {
             return (_context.Account?.Any(e => e.Number == id)).GetValueOrDefault();
+        }
+
+        public static DeletedAccount CreateDeletedAccountFromAccount (Account account)
+        {
+            return new DeletedAccount
+            {
+                Number = account.Number,
+                Restriction = account.Restriction,
+                Overdraft = account.Overdraft,
+                Profile = account.Profile,
+                CreationDate = account.CreationDate,
+                Balance = account.Balance,
+                SavingsAccount = account.SavingsAccount,
+                CreditCardNumber = account.CreditCardNumber,
+                AgencyNumber = account.AgencyNumber
+            };
         }
     }
 }
