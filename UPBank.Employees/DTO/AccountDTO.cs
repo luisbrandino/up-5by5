@@ -7,14 +7,12 @@ namespace UPBank.Employees.DTO
 {
     public class AccountDTO
     {
-        public string Number { get; set; }
         public bool Restriction { get; set; }
-        public double Overdraft { get; set; }
-        public EProfile Profile { get; set; }
-        public DateTime CreationDate { get; set; }
-        public double Balance { get; set; }
 
         [JsonIgnore]
         public string AgencyNumber { get; set; }
+        public string AccountNumber { get; set; }
+        public string CustomerCPF { get; set; }
+        public string EmployeeCPF { get; set; }
     }
 }

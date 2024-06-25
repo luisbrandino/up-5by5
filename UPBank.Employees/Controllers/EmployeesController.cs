@@ -15,6 +15,7 @@ using UPBank.Employees.Data;
 using UPBank.Employees.DTO;
 using UPBank.Employees.Service;
 using UPBank.Employees.Utils;
+using UPBank.Enums;
 using UPBank.Models;
 
 namespace UPBank.Employees.Controllers
@@ -171,45 +172,78 @@ namespace UPBank.Employees.Controllers
         }
 
 
-        // PATCH https://localhost:7028/api/Employees/Hire
-        [HttpPatch("SetProfile/{EmployeeCPF}/{AccountNumber}/{ClientCPF}")]
-        
-        public async Task<Account> ApproveAccount(AccountDTO bodyAccount,string EmployeeCPF, string AccountNumber, string ClientCPF)
+        // PATCH https://localhost:7028/api/Employees/{OptionType}/EmployeeCPF    // SetProfile or ApproveAccount
+        [HttpPatch("{op}")]
+        #region Body Example for implementation
+        /*
+         {
+            "Restriction": false,
+            "AgencyNumber": "001",
+            "CustomerCPF": "65076248024",
+            "EmployeeCPF": "84113873054",
+            "AccountNumber":"1234"
+         }
+         */
+        #endregion
+        public async Task<Account> AlterAccount(AccountDTO bodyAccount,string op)
         {
-            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{bodyAccount.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+            // Utilização de Get by Id para operações
+            var employee = await ApiConsume<Employee>.Get("https://localhost:7028/api/Employees/", bodyAccount.EmployeeCPF);
+            var client = await ApiConsume<Customer>.Get("https://localhost:7028/api/Clients/", bodyAccount.CustomerCPF);  // Inserir a porta do endpoint de Client
+            var account = await ApiConsume<Account>.Get("https://localhost:7028/api/Account/", bodyAccount.AccountNumber);  // Inserir a porta do endpoint de Client
 
+            if (employee.Manager == false && op == "SetProfile")
+            {
+                if(client.Salary <= 1500)
+                {
+                    account.Profile = EProfile.University;
+                }
+                else if(client.Salary > 1500 && client.Salary <= 10000)
+                {
+                    account.Profile = EProfile.Normal;
+                }
+                else if (client.Salary > 10000)
+                {
+                    account.Profile = EProfile.Vip;
+                }
+            }
+            if (employee.Manager == true && op == "ApproveAccount")
+            {
+                account.Restriction = !account.Restriction;
+            }
 
-            Account account = new Account();
             return account;
         }
 
-
-
-
-
-
-
-
-        // DELETE: api/Employees/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(string id)
+        // DELETE: https://localhost:7028/api/Employees/{cpf}
+        [HttpDelete("{cpf}")]
+        public async Task<IActionResult> DeleteEmployee(string cpf)
         {
             if (_context.Employee == null)
             {
-                return NotFound();
+                return NotFound("Not found a cpf");
             }
-            var employee = await _context.Employee.FindAsync(id);
-            if (employee == null)
+            var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                return NotFound();
+                var employee = await _context.Employee.FindAsync(cpf);
+                if (employee == null)
+                {
+                    return NotFound("");
+                }
+                var deletedEmployee = CreateDeletedEmployeeFromEmployee(employee);
+                _context.DeletedEmployee.Add(deletedEmployee);
+                _context.Employee.Remove(employee);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return NoContent();
             }
-
-            _context.Employee.Remove(employee);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, "Internal server error");
+            }
         }
-
         private bool EmployeeExists(string id)
         {
             return (_context.Employee?.Any(e => e.Cpf == id)).GetValueOrDefault();
@@ -246,6 +280,21 @@ namespace UPBank.Employees.Controllers
 
             return cpf.EndsWith(primeiroDigitoVerificador.ToString() + segundoDigitoVerificador.ToString());
         }
-
+        public static DeletedEmployee CreateDeletedEmployeeFromEmployee(Employee employee)
+        {
+            return new DeletedEmployee
+            {
+                Cpf = employee.Cpf,
+                Manager = employee.Manager,
+                AgencyNumber = employee.AgencyNumber,
+                Name = employee.Name,
+                BirthDate = employee.BirthDate,
+                Gender = employee.Gender,
+                Salary = employee.Salary,
+                Phone = employee.Phone,
+                Email = employee.Email,
+                AddressZipcode = employee.AddressZipcode
+            };
+        }
     }
 }
