@@ -33,7 +33,6 @@ namespace UPBank.Accounts.Controllers
             _transactionService = transactionService;
         }
 
-        // GET: api/Accounts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
         {
@@ -58,6 +57,24 @@ namespace UPBank.Accounts.Controllers
                     return NotFound();
 
                 return account;
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{number}/transactions/{type}")]
+        public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, EType transactionType)
+        {
+            try
+            {
+                var transactions = await _service.GetTransactionsByType(number, transactionType);
+
+                if (transactions == null)
+                    return NotFound();
+
+                return transactions.ToList();
             }
             catch (Exception e)
             {

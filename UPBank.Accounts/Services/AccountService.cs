@@ -5,6 +5,7 @@ using UPBank.Accounts.Data;
 using UPBank.Accounts.DTO;
 using UPBank.Accounts.Specifications;
 using UPBank.DTOs;
+using UPBank.Enums;
 using UPBank.Models;
 using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
@@ -107,7 +108,7 @@ namespace UPBank.Accounts.Services
             if (account == null)
                 return null;
 
-            Agency agency = await _agency.Get(account.AgencyNumber);
+            var agency = await _agency.Get(account.AgencyNumber);
 
             var customersInAccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
             var customers = new List<Customer>();
@@ -138,6 +139,23 @@ namespace UPBank.Accounts.Services
             }
 
             return accounts;
+        }
+
+        public async Task<IEnumerable<Transaction>?> GetTransactionsByType(string accountNumber, EType transactionType)
+        {
+            var account = await Get(accountNumber);
+
+            if (account == null)
+                return null;
+
+            var transactions = await _context.Transaction.Where(
+                transaction => transaction.Type == transactionType && 
+                transaction.OriginNumber == account.Number)
+                .ToListAsync();
+
+            transactions.Select(transaction => transaction.Origin = account);
+
+            return transactions;
         }
 
         public async Task<DeletedAccount?> Delete(string number)
