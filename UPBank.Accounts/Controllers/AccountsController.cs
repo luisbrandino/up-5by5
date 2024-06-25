@@ -64,6 +64,19 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
+        [HttpGet("restricted")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetRestrictedAccounts()
+        {
+            try
+            {
+                return (await _service.GetRestrictedAccounts()).ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("{number}/transactions/{type}")]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, int type)
         {

@@ -7,7 +7,6 @@ using UPBank.Accounts.Specifications;
 using UPBank.DTOs;
 using UPBank.Enums;
 using UPBank.Models;
-using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
 namespace UPBank.Accounts.Services
 {
@@ -147,6 +146,7 @@ namespace UPBank.Accounts.Services
             foreach (var customer in customersInAccount)
                 customers.Add(await _customer.Get(customer.CustomerCpf));
 
+            account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
             account.Agency = agency;
             account.Customers = customers;
             return account;
@@ -159,12 +159,34 @@ namespace UPBank.Accounts.Services
             foreach (var account in accounts)
             {
                 Agency agency = await _agency.Get(account.AgencyNumber);
-                var customersinaccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
+                var customersInAccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
                 var customers = new List<Customer>();
 
-                foreach (var customer in customersinaccount)
+                foreach (var customer in customersInAccount)
                     customers.Add(await _customer.Get(customer.CustomerCpf));
 
+                account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+                account.Customers = customers;
+                account.Agency = agency;
+            }
+
+            return accounts;
+        }
+
+        public async Task<IEnumerable<Account>> GetRestrictedAccounts()
+        {
+            var accounts = await _context.Account.Where(account => account.Restriction).ToListAsync();
+
+            foreach (var account in accounts)
+            {
+                Agency agency = await _agency.Get(account.AgencyNumber);
+                var customersInAccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
+                var customers = new List<Customer>();
+
+                foreach (var customer in customersInAccount)
+                    customers.Add(await _customer.Get(customer.CustomerCpf));
+
+                account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
                 account.Customers = customers;
                 account.Agency = agency;
             }

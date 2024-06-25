@@ -78,5 +78,6 @@ namespace UPBank.Accounts.Services
             return creditCard;
         }
 
+        public async Task<CreditCard?> Get(long creditCardNumber) => await _context.CreditCard.FindAsync(creditCardNumber);
     }
 }
