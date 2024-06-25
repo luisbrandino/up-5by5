@@ -684,7 +684,41 @@ namespace UPBank.Tests.Accounts
             var creditCardActivated = Assert.IsType<CreditCard>(activatedCreditCardResult.Value);
             Assert.True(creditCardActivated.Active);
             var context = new UPBankAccountsContext(_options);
-            Assert.True((await context.CreditCard.FindAsync(1111)).Active);
+            Assert.True((await context.CreditCard.FindAsync((long) 1111)).Active);
+        }
+
+        [Fact]
+        public async Task Get_AllAccounts_ReturnsAccounts()
+        {
+            var controller = Make();
+
+            var accountsResult = await controller.GetAccount();
+
+            var accounts = Assert.IsType<List<Account>>(accountsResult.Value);
+            Assert.Equal(2, accounts.Count);
+        }
+
+        [Fact]
+        public async Task Get_Account_ReturnsAccounts()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetAccount("123456789");
+
+            var account = Assert.IsType<Account>(accountResult.Value);
+            Assert.Equal("123456789", account.Number);
+            Assert.Equal(2000, account.Balance);
+        }
+
+        [Fact]
+        public async Task Get_AccountNotInDatabase_ReturnsNotFound()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetAccount("1232345678239");
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(accountResult.Result);
+            Assert.Equal(404, notFoundResult.StatusCode);
         }
     }
 }

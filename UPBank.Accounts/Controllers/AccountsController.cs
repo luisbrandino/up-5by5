@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Api.Agency.Abstract;
+using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
 using UPBank.Accounts.Filters;
 using UPBank.Accounts.Services;
@@ -34,95 +35,34 @@ namespace UPBank.Accounts.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
         {
-            if (_context.Account == null)
+            try
             {
-                return NotFound();
+                return (await _service.Get()).ToList();
             }
-            IEnumerable<Models.Agency> agencies = await _agency.Get();
-            List<Agency> agenciesAll = new List<Agency>();
-
-            var accounts = await _context.Account.ToListAsync();
-            foreach (var account in accounts)
+            catch (Exception e)
             {
-               
-                Models.Agency agencie = await _agency.Get(account.AgencyNumber);
-                //List<Agency> agenciesAll = new List<Agency>();
-                var customersinaccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
-                var customers = new List<Customer>();
-                foreach (var customer in customersinaccount)
-                {
-                    customers.Add(await _customer.Get(customer.CustomerCpf));
-                }
-                //account.Agency = agencie;
-                account.Customers = customers;
-                account.Agency = agencie;
+                return BadRequest(e.Message);
             }
-            return accounts;        
-            
-            //foreach (var agency in agencies)
-            //{
-            //    var agenciesDTO = new Agency();
-
-            //    agenciesDTO.Number = agency.Number;
-            //    //agenciesDTO.Address = agency.Address;
-            //    //agenciesDTO.AddressZipcode = agency.AddressZipcode;
-            //    //agenciesDTO.Cnpj = agency.Cnpj;
-            //    //agenciesDTO.Employees = agency.Employees;
-            //    //agenciesDTO.Restriction = agency.Restriction;
-
-            //    agenciesAll.Add(agenciesDTO);
-            //}
-            //return agenciesAll;
         }
 
-        // GET: api/Accounts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(string? id)
+        [HttpGet("{number}")]
+        public async Task<ActionResult<Account?>> GetAccount(string number)
         {
-            if (_context.Account == null)
+            try
             {
-                return NotFound();
+                var account = await _service.Get(number);
+
+                if (account == null)
+                    return NotFound();
+
+                return account;
             }
-
-            if (id == null)
+            catch (Exception e)
             {
-                return NotFound();
+                return BadRequest(e.Message);
             }
-
-            //Account accountCreated = new Account()
-            //{
-            //    Number = "101", AgencyNumber = "10001", Balance = 2010, CreationDate = DateTime.Now, Overdraft = 100, Profile = Enums.EProfile.Vip , CreditCardNumber = "101010"
-            //};
-            //_context.Add(accountCreated);
-            //await _context.SaveChangesAsync();
-
-            AccountCustomer accountcostumer = new AccountCustomer()
-            {
-                CustomerCpf = "000.000.000-03",
-                AccountNumber = "101"
-            };
-            _context.Add(accountcostumer);
-            await _context.SaveChangesAsync();
-
-
-            var account = _context.Account.Find(id);
-            Models.Agency agencie = await _agency.Get(account.AgencyNumber);
-            //List<Agency> agenciesAll = new List<Agency>();
-            var customersinaccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
-            var customers = new List<Customer>();
-            foreach (var customer in customersinaccount)
-            {
-                customers.Add(await _customer.Get(customer.CustomerCpf));
-            }
-            account.Agency = agencie;        
-            account.Customers = customers;
-            return account;
         }
 
-        //}
-
-        // PUT: api/Accounts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(string id, Account account)
         {

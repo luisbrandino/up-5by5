@@ -98,6 +98,46 @@ namespace UPBank.Accounts.Services
             return await _context.Account.FindAsync(number);
         }
 
+        public async Task<Account?> Get(string number)
+        {
+            var account = await _context.Account.FindAsync(number);
+
+            if (account == null)
+                return null;
+
+            Agency agency = await _agency.Get(account.AgencyNumber);
+
+            var customersInAccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
+            var customers = new List<Customer>();
+
+            foreach (var customer in customersInAccount)
+                customers.Add(await _customer.Get(customer.CustomerCpf));
+
+            account.Agency = agency;
+            account.Customers = customers;
+            return account;
+        }
+
+        public async Task<IEnumerable<Account>> Get()
+        {
+            var accounts = await _context.Account.ToListAsync();
+
+            foreach (var account in accounts)
+            {
+                Agency agency = await _agency.Get(account.AgencyNumber);
+                var customersinaccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
+                var customers = new List<Customer>();
+
+                foreach (var customer in customersinaccount)
+                    customers.Add(await _customer.Get(customer.CustomerCpf));
+
+                account.Customers = customers;
+                account.Agency = agency;
+            }
+
+            return accounts;
+        }
+
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
     }
 }
