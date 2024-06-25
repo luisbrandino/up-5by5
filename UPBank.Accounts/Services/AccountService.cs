@@ -141,6 +141,20 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
+        public async Task<IEnumerable<Transaction>?> GetStatement(string number)
+        {
+            var account = await Get(number);
+
+            if (account == null)
+                return null;
+
+            var transactions = await _context.Transaction
+                .Where(transaction => transaction.OriginNumber == account.Number)
+                .ToListAsync();
+
+            return transactions;
+        }
+
         public async Task<IEnumerable<Transaction>?> GetTransactionsByType(string accountNumber, EType transactionType)
         {
             var account = await Get(accountNumber);

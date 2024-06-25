@@ -82,6 +82,24 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
+        [HttpGet("{number}/statement")]
+        public async Task<ActionResult<IEnumerable<Transaction>>> GetAccountStatement(string number)
+        {
+            try
+            {
+                var transactions = await _service.GetStatement(number);
+
+                if (transactions == null)
+                    return NotFound();
+
+                return transactions.ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(string id, Account account)
         {
