@@ -18,6 +18,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddSingleton<ICustomerApi, MockCustomerApi>();
 builder.Services.AddSingleton<IAgencyApi, MockAgencyApi>();
+
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<CreditCardService>();
 builder.Services.AddScoped<TransactionService>();

@@ -15,7 +15,18 @@ namespace UPBank.Accounts.Specifications
         }
     }
 
-    public class PaymentTransactionCreationValidation : BaseTransactionCreationValidation
+    public class DebitTransactionCreationValidation : BaseTransactionCreationValidation
+    {
+        public override void Validate(Transaction transaction)
+        {
+            base.Validate(transaction);
+
+            if (transaction.Origin.Balance < transaction.Value)
+                throw new Exception("Conta de origem não possui saldo suficiente");
+        }
+    }
+
+    public class TransferTransactionCreationValidation : DebitTransactionCreationValidation
     {
         public override void Validate(Transaction transaction)
         {

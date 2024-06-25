@@ -1,4 +1,6 @@
 ﻿using UPBank.Accounts.Data;
+using UPBank.Accounts.Operations;
+using UPBank.Accounts.Operations.Abstract;
 using UPBank.Accounts.Specifications;
 using UPBank.Accounts.Specifications.Abstract;
 using UPBank.DTOs;
@@ -44,20 +46,37 @@ namespace UPBank.Accounts.Services
         {
             Transaction transaction = await MakeFromRequestedTransaction(requestedTransaction);
 
-            GetCorrectValidation(transaction.Type).Validate(transaction);
+            GetValidation(transaction.Type).Validate(transaction);
 
-            _context.Transaction.Add(transaction);
+            GetOperation(transaction.Type).Execute(transaction);
+
+            _context.Add(transaction);
+
             await _context.SaveChangesAsync();
 
             return transaction;
         }
 
-        private ITransactionValidation GetCorrectValidation(EType transactionType)
+        private ITransactionValidation GetValidation(EType transactionType)
+        {
+            return transactionType switch
+            {   
+                EType.Transfer => new TransferTransactionCreationValidation(),
+                EType.Withdraw => new DebitTransactionCreationValidation(),
+                EType.Payment => new DebitTransactionCreationValidation(),
+                _ => new BaseTransactionCreationValidation()
+            };
+        }
+
+        private ITransactionOperation GetOperation(EType transactionType)
         {
             return transactionType switch
             {
-                EType.Payment => new PaymentTransactionCreationValidation(),
-                _ => new BaseTransactionCreationValidation()
+                EType.Transfer => new TransferTransactionOperation(),
+                EType.Deposit => new CreditTransactionOperation(),
+                EType.Loan => new CreditTransactionOperation(),
+                EType.Withdraw => new DebitTransactionOperation(),
+                EType.Payment => new DebitTransactionOperation()
             };
         }
     }

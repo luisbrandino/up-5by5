@@ -134,6 +134,27 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
+        public async Task Post_NoClients_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var accountCreationDTO = new AccountCreationDTO
+            {
+                Overdraft = 2000,
+                Profile = Enums.EProfile.Normal,
+                AgencyNumber = "10001",
+                Customers = new List<string> { }
+            };
+
+            var createdResult = await controller.Post(accountCreationDTO);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("É necessário que a conta pertença à pelo menos um cliente", badRequestMessage);
+        }
+
+        [Fact]
         public async Task Post_FirstClientIsMinor_ReturnsBadRequest()
         {
             var controller = Make();
@@ -222,7 +243,89 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_TransactionWithNegativeValue_ReturnsBadRequest()
+        public async Task Post_PaymentTransactionWithNegativeValue_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                Value = -10
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Valor da transação tem que ser positivo", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_DepositTransactionWithNegativeValue_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Deposit,
+                OriginNumber = "123456789",
+                Value = -10
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Valor da transação tem que ser positivo", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_TransferTransactionWithNegativeValue_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Transfer,
+                OriginNumber = "123456789",
+                DestinyNumber = "505020",
+                Value = -10
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Valor da transação tem que ser positivo", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_WithdrawTransactionWithNegativeValue_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Withdraw,
+                OriginNumber = "123456789",
+                DestinyNumber = "505020",
+                Value = -10
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Valor da transação tem que ser positivo", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_LoanTransactionWithNegativeValue_ReturnsBadRequest()
         {
             var controller = Make();
 
@@ -284,13 +387,13 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_PaymentTransactionWithNoDestinyAccount_ReturnsBadRequest()
+        public async Task Post_TransferTransactionWithNoDestinyAccount_ReturnsBadRequest()
         {
             var controller = Make();
 
             var transactionCreationDto = new TransactionCreationDTO
             {
-                Type = Enums.EType.Payment,
+                Type = Enums.EType.Transfer,
                 OriginNumber = "123456789",
                 Value = 1000
             };
@@ -304,13 +407,13 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_PaymentTransactionWithInvalidDestinyAccount_ReturnsBadRequest()
+        public async Task Post_TransferTransactionWithInvalidDestinyAccount_ReturnsBadRequest()
         {
             var controller = Make();
 
             var transactionCreationDto = new TransactionCreationDTO
             {
-                Type = Enums.EType.Payment,
+                Type = Enums.EType.Transfer,
                 OriginNumber = "123456789",
                 DestinyNumber = "23948209348",
                 Value = 1000
@@ -325,13 +428,13 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_PaymentTransactionWithDuplicateOriginAndDestinyAccount_ReturnsBadRequest()
+        public async Task Post_TransferTransactionWithDuplicateOriginAndDestinyAccount_ReturnsBadRequest()
         {
             var controller = Make();
 
             var transactionCreationDto = new TransactionCreationDTO
             {
-                Type = Enums.EType.Payment,
+                Type = Enums.EType.Transfer,
                 OriginNumber = "123456789",
                 DestinyNumber = "123456789",
                 Value = 1000
@@ -346,13 +449,74 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
-        public async Task Post_ValidPaymentTransaction_ReturnsCreatedTransaction()
+        public async Task Post_TransferTransactionNotEnoughBalance_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Transfer,
+                OriginNumber = "123456789",
+                DestinyNumber = "505020",
+                Value = 3000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de origem não possui saldo suficiente", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_WithdrawTransactionNotEnoughBalance_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Withdraw,
+                OriginNumber = "123456789",
+                Value = 3000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de origem não possui saldo suficiente", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_PaymentTransactionNotEnoughBalance_ReturnsBadRequest()
         {
             var controller = Make();
 
             var transactionCreationDto = new TransactionCreationDTO
             {
                 Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                Value = 3000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de origem não possui saldo suficiente", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_ValidTransferTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Transfer,
                 OriginNumber = "123456789",
                 DestinyNumber = "505020",
                 Value = 1000
@@ -366,6 +530,100 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
+            Assert.Equal(2111, (await context.Account.FindAsync("505020")).Balance);
+        }
+
+        [Fact]
+        public async Task Post_ValidPaymentTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var createdTransaction = Assert.IsType<Transaction>(createdResult.Value);
+            Assert.Equal(transactionCreationDto.Type, createdTransaction.Type);
+            Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
+            Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
+        }
+
+        [Fact]
+        public async Task Post_ValidDepositTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Deposit,
+                OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var createdTransaction = Assert.IsType<Transaction>(createdResult.Value);
+            Assert.Equal(transactionCreationDto.Type, createdTransaction.Type);
+            Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
+            Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3000, (await context.Account.FindAsync("123456789")).Balance);
+        }
+
+        [Fact]
+        public async Task Post_ValidWithdrawTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Withdraw,
+                OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var createdTransaction = Assert.IsType<Transaction>(createdResult.Value);
+            Assert.Equal(transactionCreationDto.Type, createdTransaction.Type);
+            Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
+            Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
+        }
+
+        [Fact]
+        public async Task Post_ValidLoanTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Loan,
+                OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var createdTransaction = Assert.IsType<Transaction>(createdResult.Value);
+            Assert.Equal(transactionCreationDto.Type, createdTransaction.Type);
+            Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
+            Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3000, (await context.Account.FindAsync("123456789")).Balance);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace UPBank.Accounts.Specifications
                 throw new Exception("Uma conta pode ter no máximo dois clientes");
 
             if (account.Customers.Count <= 0)
-                throw new Exception("É necessário que a conta pertence à pelo menos um cliente");
+                throw new Exception("É necessário que a conta pertença à pelo menos um cliente");
 
             if (account.Customers.Count != account.Customers.Distinct().Count())
                 throw new Exception("Não pode haver clientes repetidos");
