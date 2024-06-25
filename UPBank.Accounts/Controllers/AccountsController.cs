@@ -134,59 +134,27 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpDelete("{Number}")]
-        public async Task<IActionResult> DeleteAccount(string Number)
+        [HttpDelete("{number}")]
+        public async Task<ActionResult<DeletedAccount>> DeleteAccount(string number)
         {
-            if (_context.Account == null)
-            {
-                return NotFound("Account not found");
-            }
-            var transaction = await _context.Database.BeginTransactionAsync();
-
             try
             {
-                var account = await _context.Account.FindAsync(Number);
+                var deletedAccount = await _service.Delete(number);
 
-                if (account == null)
-                {
+                if (deletedAccount == null)
                     return NotFound();
-                }
 
-                var deletedAccount = CreateDeletedAccountFromAccount(account);
-                _context.DeletedAccount.Add(deletedAccount);
-                _context.Account.Remove(account);
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return NoContent();
-
+                return deletedAccount;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                await transaction.RollbackAsync();
-                return StatusCode(500, "Internal server error");
+                return BadRequest(e.Message);
             }
         }
 
         private bool AccountExists(string id)
         {
             return (_context.Account?.Any(e => e.Number == id)).GetValueOrDefault();
-        }
-
-        public static DeletedAccount CreateDeletedAccountFromAccount (Account account)
-        {
-            return new DeletedAccount
-            {
-                Number = account.Number,
-                Restriction = account.Restriction,
-                Overdraft = account.Overdraft,
-                Profile = account.Profile,
-                CreationDate = account.CreationDate,
-                Balance = account.Balance,
-                SavingsAccount = account.SavingsAccount,
-                CreditCardNumber = account.CreditCardNumber,
-                AgencyNumber = account.AgencyNumber
-            };
         }
     }
 }
