@@ -77,6 +77,19 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
+        [HttpGet("profile/{profile}")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(EProfile profile)
+        {
+            try
+            {
+                return (await _service.GetAccountsByProfile(profile)).ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("{number}/transactions/{type}")]
         public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, int type)
         {

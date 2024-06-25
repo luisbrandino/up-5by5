@@ -173,6 +173,27 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
+        public async Task<IEnumerable<Account>> GetAccountsByProfile(EProfile profile)
+        {
+            var accounts = await _context.Account.Where(account => account.Profile == profile).ToListAsync();
+
+            foreach (var account in accounts)
+            {
+                Agency agency = await _agency.Get(account.AgencyNumber);
+                var customersInAccount = await _context.AccountCustomer.Where(ac => ac.AccountNumber == account.Number).ToListAsync();
+                var customers = new List<Customer>();
+
+                foreach (var customer in customersInAccount)
+                    customers.Add(await _customer.Get(customer.CustomerCpf));
+
+                account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+                account.Customers = customers;
+                account.Agency = agency;
+            }
+
+            return accounts;
+        }
+
         public async Task<IEnumerable<Account>> GetRestrictedAccounts()
         {
             var accounts = await _context.Account.Where(account => account.Restriction).ToListAsync();
