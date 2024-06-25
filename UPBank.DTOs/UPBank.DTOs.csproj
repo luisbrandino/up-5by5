@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UPBank.Enums\UPBank.Enums.csproj" />
-    <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
   </ItemGroup>
 
 </Project>
