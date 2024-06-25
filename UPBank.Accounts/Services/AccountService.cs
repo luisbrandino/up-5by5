@@ -64,6 +64,8 @@ namespace UPBank.Accounts.Services
             account.CreditCard = await _creditCardService.Create(account.Customers.First().Name);
             account.CreditCardNumber = account.CreditCard.Number;
 
+            _context.Add(account);
+
             account.Customers.ForEach(customer =>
             {
                 AccountCustomer accountCustomer = new AccountCustomer
@@ -74,8 +76,7 @@ namespace UPBank.Accounts.Services
 
                 _context.AccountCustomer.Add(accountCustomer);
             });
-
-            _context.Add(account);
+            
             await _context.SaveChangesAsync();
 
             return account;

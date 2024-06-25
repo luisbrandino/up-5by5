@@ -131,6 +131,10 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
             Assert.Equal(3, await context.CreditCard.CountAsync());
+
+            var creditCards = await context.CreditCard.ToListAsync();
+
+            Assert.Equal(1, 1);
         }
 
         [Fact]

@@ -100,6 +100,24 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
+        [HttpGet("{number}/balance")]
+        public async Task<ActionResult<Dictionary<string, double>>> GetBalance(string number)
+        {
+            try
+            {
+                var account = await _service.GetRaw(number);
+
+                if (account == null)
+                    return NotFound();
+
+                return new Dictionary<string, double> { { "Balance", account.Balance } };
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(string id, Account account)
         {

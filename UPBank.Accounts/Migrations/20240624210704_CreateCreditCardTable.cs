@@ -26,8 +26,7 @@ namespace UPBank.Accounts.Migrations
                 name: "CreditCard",
                 columns: table => new
                 {
-                    Number = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Number = table.Column<long>(type: "bigint", nullable: false),
                     ExtractionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Limit = table.Column<double>(type: "float", nullable: false),
                     CVV = table.Column<string>(type: "nvarchar(max)", nullable: false),
