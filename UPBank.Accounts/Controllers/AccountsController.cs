@@ -30,47 +30,6 @@ namespace UPBank.Accounts.Controllers
             _transactionService = transactionService;
         }
 
-        /*
-        // GET: api/Accounts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
-        {
-          if (_context.Account == null)
-          {
-              return NotFound();
-          }
-            List<Account> accounts = await _context.Account.ToListAsync();
-
-            foreach (var account in accounts)
-            {
-                string number = account.AgencyNumber;
-                account.Agency = await _agency.Get(number);
-            }
-
-            return accounts;
-        }
-
-        // GET: api/Accounts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(string id)
-        {
-          if (_context.Account == null)
-          {
-              return NotFound();
-          }
-            var account = await _context.Account.FindAsync(id);
-
-            account.Agency = await _agency.Get(account.AgencyNumber);
-
-            if (account == null)
-            {
-                return NotFound();
-            }
-
-            return account;
-        }
-        */
-       
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAccount(string id, Account account)
         {
