@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using UPBank.Accounts.Api.Agency;
 using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Controllers;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.DTO;
 using UPBank.Accounts.Services;
 using UPBank.DTOs;
 using UPBank.Models;
@@ -18,6 +20,7 @@ namespace UPBank.Tests.Accounts
         {
             _options = new DbContextOptionsBuilder<UPBankAccountsContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
             var context = new UPBankAccountsContext(_options);
@@ -718,6 +721,38 @@ namespace UPBank.Tests.Accounts
             var accountResult = await controller.GetAccount("1232345678239");
 
             var notFoundResult = Assert.IsType<NotFoundResult>(accountResult.Result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Delete_Account_ShouldInsertIntoDeletedAccountTable()
+        {
+            var controller = Make();
+
+            var deletedAccountResult = await controller.DeleteAccount("123456789");
+
+            var deletedAccount = Assert.IsType<DeletedAccount>(deletedAccountResult.Value);
+            Assert.Equal("123456789", deletedAccount.Number);
+
+
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.DeletedAccount.CountAsync());
+
+            Assert.Null(await context.Account.FindAsync("123456789"));
+
+            var deletedAccountFromDatabase = await context.DeletedAccount.FindAsync("123456789");
+
+            Assert.Equal("123456789", deletedAccountFromDatabase.Number);
+            Assert.Equal(deletedAccount.Number, deletedAccountFromDatabase.Number);
+        }
+
+        [Fact]
+        public async Task Delete_AccountNotInDatabase_ReturnsNotFound()
+        {
+            var controller = Make();
+
+            var deletedAccountResult = await controller.DeleteAccount("13123123123");
+            var notFoundResult = Assert.IsType<NotFoundResult>(deletedAccountResult.Result);
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

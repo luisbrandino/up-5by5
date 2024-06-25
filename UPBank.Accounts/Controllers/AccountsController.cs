@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.DTO;
 using UPBank.Accounts.Filters;
 using UPBank.Accounts.Services;
 using UPBank.DTOs;
+using UPBank.Enums;
 using UPBank.Models;
 
 namespace UPBank.Accounts.Controllers
@@ -132,23 +134,22 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(string id)
+        [HttpDelete("{number}")]
+        public async Task<ActionResult<DeletedAccount>> DeleteAccount(string number)
         {
-            if (_context.Account == null)
+            try
             {
-                return NotFound();
+                var deletedAccount = await _service.Delete(number);
+
+                if (deletedAccount == null)
+                    return NotFound();
+
+                return deletedAccount;
             }
-            var account = await _context.Account.FindAsync(id);
-            if (account == null)
+            catch (Exception e)
             {
-                return NotFound();
+                return BadRequest(e.Message);
             }
-
-            _context.Account.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool AccountExists(string id)

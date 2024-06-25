@@ -2,9 +2,11 @@
 using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.DTO;
 using UPBank.Accounts.Specifications;
 using UPBank.DTOs;
 using UPBank.Models;
+using static MongoDB.Bson.Serialization.Serializers.SerializerHelper;
 
 namespace UPBank.Accounts.Services
 {
@@ -136,6 +138,49 @@ namespace UPBank.Accounts.Services
             }
 
             return accounts;
+        }
+
+        public async Task<DeletedAccount?> Delete(string number)
+        {
+            var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var account = await _context.Account.FindAsync(number);
+
+                if (account == null)
+                    return null;
+
+                var deletedAccount = CreateDeletedAccountFromAccount(account);
+                _context.DeletedAccount.Add(deletedAccount);
+                _context.Account.Remove(account);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return deletedAccount;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public static DeletedAccount CreateDeletedAccountFromAccount(Account account)
+        {
+            return new DeletedAccount
+            {
+                Number = account.Number,
+                Restriction = account.Restriction,
+                Overdraft = account.Overdraft,
+                Profile = account.Profile,
+                CreationDate = account.CreationDate,
+                Balance = account.Balance,
+                SavingsAccount = account.SavingsAccount,
+                CreditCardNumber = account.CreditCardNumber,
+                AgencyNumber = account.AgencyNumber
+            };
         }
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
