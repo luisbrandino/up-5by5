@@ -1,6 +1,8 @@
 ﻿using UPBank.Accounts.Data;
 using UPBank.Accounts.Specifications;
+using UPBank.Accounts.Specifications.Abstract;
 using UPBank.DTOs;
+using UPBank.Enums;
 using UPBank.Models;
 
 namespace UPBank.Accounts.Services
@@ -42,7 +44,7 @@ namespace UPBank.Accounts.Services
         {
             Transaction transaction = await MakeFromRequestedTransaction(requestedTransaction);
 
-            new TransactionCreationValidation().Validate(transaction);
+            GetCorrectValidation(transaction.Type).Validate(transaction);
 
             _context.Transaction.Add(transaction);
             await _context.SaveChangesAsync();
@@ -50,5 +52,13 @@ namespace UPBank.Accounts.Services
             return transaction;
         }
 
+        private ITransactionValidation GetCorrectValidation(EType transactionType)
+        {
+            return transactionType switch
+            {
+                EType.Payment => new PaymentTransactionCreationValidation(),
+                _ => new BaseTransactionCreationValidation()
+            };
+        }
     }
 }

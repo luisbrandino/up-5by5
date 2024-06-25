@@ -5,9 +5,6 @@ using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Controllers;
 using UPBank.Accounts.Data;
 using UPBank.Accounts.Services;
-using UPBank.Addresses.Controllers;
-using UPBank.Addresses.PostalServices;
-using UPBank.Accounts.Specifications;
 using UPBank.DTOs;
 using UPBank.Models;
 
@@ -34,6 +31,18 @@ namespace UPBank.Tests.Accounts
                 Number = "123456789",
                 CreditCardNumber = 2020,
                 Balance = 2000,
+                Restriction = true
+            });
+
+            context.Account.Add(new Account
+            {
+                Overdraft = 1000,
+                Profile = Enums.EProfile.Normal,
+                AgencyNumber = "10801",
+                Customers = new List<Customer>(),
+                Number = "505020",
+                CreditCardNumber = 1111,
+                Balance = 1111,
                 Restriction = true
             });
 
@@ -77,7 +86,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
             Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(2, await context.Account.CountAsync());
+            Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
             Assert.Equal(1, await context.CreditCard.CountAsync());
         }
@@ -165,7 +174,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
             Assert.Equal(accountCreationDTO.Customers.Count, createdAccount.Customers.Count);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(2, await context.Account.CountAsync());
+            Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(2, await context.AccountCustomer.CountAsync());
             Assert.Equal(1, await context.CreditCard.CountAsync());
         }
@@ -252,7 +261,6 @@ namespace UPBank.Tests.Accounts
             Assert.Equal("Conta de origem não cadastrada", badRequestMessage);
         }
 
-
         [Fact]
         public async Task Post_ValidTransaction_ReturnsCreatedTransaction()
         {
@@ -262,6 +270,91 @@ namespace UPBank.Tests.Accounts
             {
                 Type = Enums.EType.Loan,
                 OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var createdTransaction = Assert.IsType<Transaction>(createdResult.Value);
+            Assert.Equal(transactionCreationDto.Type, createdTransaction.Type);
+            Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
+            Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(1, await context.Transaction.CountAsync());
+        }
+
+        [Fact]
+        public async Task Post_PaymentTransactionWithNoDestinyAccount_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de destino não cadastrada", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_PaymentTransactionWithInvalidDestinyAccount_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                DestinyNumber = "23948209348",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de destino não cadastrada", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_PaymentTransactionWithDuplicateOriginAndDestinyAccount_ReturnsBadRequest()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                DestinyNumber = "123456789",
+                Value = 1000
+            };
+
+            var createdResult = await controller.MakeTransaction(transactionCreationDto);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Conta de origem não pode ser a mesma que conta de destino", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_ValidPaymentTransaction_ReturnsCreatedTransaction()
+        {
+            var controller = Make();
+
+            var transactionCreationDto = new TransactionCreationDTO
+            {
+                Type = Enums.EType.Payment,
+                OriginNumber = "123456789",
+                DestinyNumber = "505020",
                 Value = 1000
             };
 
