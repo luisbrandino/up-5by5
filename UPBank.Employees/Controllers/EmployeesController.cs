@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using UPBank.Addresses.Controllers;
 using UPBank.Addresses.PostalServices;
 using UPBank.Addresses.PostalServices.Abstract;
 using UPBank.Employees.Data;
+using UPBank.Employees.DTO;
 using UPBank.Employees.Service;
 using UPBank.Employees.Utils;
 using UPBank.Models;
@@ -23,16 +25,16 @@ namespace UPBank.Employees.Controllers
     {
         private readonly UPBankEmployeesContext _context;
         private readonly EmployeeService _employeeService;
-        private readonly string _addressUri = "https://localhost:7004/";
+        private readonly string _addressEndPoint = "https://localhost:7004";
+        private readonly string _agencyEndPoint = "https://localhost:7004"; // Atualizar Endpoint
 
         public EmployeesController(UPBankEmployeesContext context)
         {
             _context = context;
         }
 
-        // GET: api/Employees
+        // GET: https://localhost:7028/api/Employees/
         [HttpGet]
-        #region Teste Atual
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
         {
             if (_context.Employee == null)
@@ -40,103 +42,53 @@ namespace UPBank.Employees.Controllers
                 return Problem("Entity Set is null");
             }
 
-            List<Employee> list = await _context.Employee.Include(a => a.Address).Include(a => a.Agency).ToListAsync();
+            List<Employee> list = await _context.Employee.ToListAsync();
+
+            foreach(Employee employee in list)
+            {
+                var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{employee.AddressZipcode}");
+                employee.Address = address;
+                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{employee.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+                employee.Agency = agency;
+            }
 
             return list;
         }
-        #endregion
-        #region Meu código
-        //public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
-        //{
-        //  if (_context.Employee == null)
-        //  {
-        //      return Problem("Entity Set is null");
-        //  }
 
-        //    List<Employee> list = await _context.Employee.Include(a => a.Address).Include(a => a.Agency).ToListAsync();
-
-        //    return list;
-        //}
-        #endregion
-        #region Código Luan
-        /*
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployee()
+        // GET: https://localhost:7028/api/Employees/cpf
+        [HttpGet("{cpf}")]
+        public async Task<ActionResult<Employee>> GetEmployeeById(string cpf)
         {
             if (_context.Employee == null)
             {
                 return Problem("Entity Set is null");
             }
-            // Recupera a lista de funcionários do banco de dados.
-            var employees = await _context.Employee.ToListAsync();
-            // Lista para armazenar os objetos Employee mapeados.
-            var mappedEmployees = new List<Employee>();
-            // Para cada funcionário, mapeia-o para um objeto Employee.
-            foreach (var employee in employees)
-            {
-                // Cria um novo objeto Employee.
-                var mappedEmployee = new Employee
-                {
-                    Cpf = employee.Cpf,
-                    Name = employee.Name,
-                };
-                // Se o funcionário tiver um endereço associado, tenta obter o endereço da API.
-                if (!string.IsNullOrEmpty(employee.AddressZipcode))
-                {
-                    // Faz a chamada à API para obter o endereço com base no código postal do funcionário.
-                    var addressResult = await ApiConsume<List<Address>>.Get(_addressUri, $"/api/addresses/{employee.AddressZipcode}");
-                    // Se o endereço for encontrado, mapeia-o para o objeto Address e atribui ao funcionário.
-                    if (addressResult != null && addressResult.Any())
-                    {
-                        var address = addressResult.First(); // Supondo que a API retorna apenas um endereço.
-                        mappedEmployee.Address = new Address
-                        {
-                            Zipcode = address.Zipcode,
-                            Street = address.Street,
-                            City = address.City,
-                            State = address.State,
-                            Neighborhood = address.Neighborhood,
-                            Number = employee.Address.Number,
-                            Complement = employee.Address.Complement
-                        };
-                    }
-                }
-                // Adiciona o objeto Employee mapeado à lista de funcionários mapeados.
-                mappedEmployees.Add(mappedEmployee);
-            }
-            return mappedEmployees;
-        }
-        */
-        #endregion
 
-        // GET: api/Employees/5
-        [HttpGet("{cpf}")]
-        public async Task<ActionResult<Employee>> GetEmployee(string cpf)
-        {
-          if (_context.Employee == null)
-          {
-              return NotFound();
-          }
             var employee = await _context.Employee.FindAsync(cpf);
 
-            if (cpf == null)
+            if (employee == null)
             {
                 return NotFound();
             }
 
-            Employee? hiredEmployee = await _context.Employee.Include(a => a.Agency).FirstOrDefaultAsync(p => p.Cpf == cpf);
-
-            if(hiredEmployee == null)
+            if (!string.IsNullOrEmpty(employee.AddressZipcode))
             {
-                return NotFound("There isn't an active hired worker with this identification");
+                var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{employee.AddressZipcode}");
+                employee.Address = address;
             }
 
-            return hiredEmployee;
+            if (!string.IsNullOrEmpty(employee.AgencyNumber))
+            {
+                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agency/{employee.AgencyNumber}"); // Inserir a rota correta do endpoint de Agency
+                employee.Agency = agency;
+            }
+
+            return Ok(employee);
         }
 
         // PUT: api/Employees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(string id, Employee employee)
+            public async Task<IActionResult> PutEmployee(string id, Employee employee)
         {
             if (id != employee.Cpf)
             {
@@ -164,79 +116,78 @@ namespace UPBank.Employees.Controllers
             return NoContent();
         }
 
-        // POST: api/Employees/Hire
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST https://localhost:7028/api/Employees/Hire
         [HttpPost("Hire")]
-        public async Task<ActionResult<Employee>> HireEmployee(Employee employee)
+        #region Post Example for the https://localhost:7028/api/Employees/Hire URL
+        /*
+         {
+          "Cpf": "61235000079",
+          "Name": "João Silva",
+          "Gender": "M",
+          "Salary": 5000.00,
+          "Phone": "11987654321",
+          "Email": "joao.silva@example.com",
+          "BirthDate": "2000-01-01",
+          "AddressZipcode": "14805-295",
+          "Manager": true,
+          "AgencyNumber": "001"
+         }
+         */
+        #endregion
+        public async Task<ActionResult<Employee>> HireEmployee(EmployeeDTO dto)
         {
             if (_context.Employee == null)
             {
-                return Problem("Entity set 'UPBankEmployeesContext.Employee' is null.");
-            }
-            if (ValidCPF(employee.Cpf) == false)
-            {
-                return BadRequest("Invalid CPF");
-            }
-            var newEmployee = new Employee
-            {
-                Cpf = new string(employee.Cpf.Where(char.IsDigit).ToArray()),
-                Name = employee.Name,
-                BirthDate = employee.BirthDate,
-                Gender = employee.Gender,
-                Salary = employee.Salary,
-                Phone = employee.Phone,
-                Email = employee.Email,
-                Register = employee.Register,
-                Manager = employee.Manager,
-                AgencyNumber = employee.AgencyNumber, // Devo manter?
-                Agency = await _employeeService.GetAgencyAsync(employee.AgencyNumber)
-            };
-
-            if (!string.IsNullOrEmpty(employee.AddressZipcode))
-            {
-
-                string zipCode = new string(employee.AddressZipcode.Where(char.IsDigit).ToArray());
-
-                var address = await new ViaCepService().Fetch(zipCode);
-
-                if (address != null)
-                {
-                    newEmployee.Address = new Address
-                    {
-                        Zipcode = zipCode,
-                        Street = address.Street,
-                        City = address.City,
-                        State = address.State,
-                        Neighborhood = address.Neighborhood,
-                        Number = employee.Address?.Number ?? 0,
-                        Complement = employee.Address.Complement
-                    };
-                }
-                else
-                {
-                    return BadRequest("Address not found for the provided ZIP code.");
-                }
+                return Problem("Entity set 'FlightsApiContext.Flights' is null.");
             }
 
-            _context.Employee.Add(newEmployee);
-            try
+            var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{dto.AddressZipcode}");
+            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{dto.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+            
+            dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
+            if (!ValidCPF(dto.Cpf))
             {
-                await _context.SaveChangesAsync();
+                return BadRequest($"Invalid cpf: {dto.Cpf}");
             }
-            catch (DbUpdateException)
-            {
-                if (EmployeeExists(newEmployee.Cpf))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetEmployee", new { id = newEmployee.Cpf }, newEmployee);
+            Employee employee = new Employee();
+            #region Saving Variables
+            employee.Address = address;
+            employee.Agency = agency;
+            employee.Cpf = dto.Cpf;
+            employee.Name = dto.Name;
+            employee.Gender = dto.Gender;
+            employee.Salary = dto.Salary;
+            employee.Phone = dto.Phone;
+            employee.Email = dto.Email;
+            employee.BirthDate = dto.BirthDate;
+            employee.AddressZipcode = dto.AddressZipcode;
+            employee.Manager = dto.Manager;
+            employee.AgencyNumber = dto.AgencyNumber;
+            employee.Register = 1;
+            #endregion
+            _context.Employee.Add(employee);
+            await _context.SaveChangesAsync();
+            return Ok($"Funcionário: {dto.Name} incluído no sistema");
         }
+
+
+        // PATCH https://localhost:7028/api/Employees/Hire
+        [HttpPatch("SetProfile/{EmployeeCPF}/{AccountNumber}/{ClientCPF}")]
+        
+        public async Task<Account> ApproveAccount(AccountDTO bodyAccount,string EmployeeCPF, string AccountNumber, string ClientCPF)
+        {
+            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{bodyAccount.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+
+
+            Account account = new Account();
+            return account;
+        }
+
+
+
+
+
+
 
 
         // DELETE: api/Employees/5

@@ -12,8 +12,8 @@ using UPBank.Employees.Data;
 namespace UPBank.Employees.Migrations
 {
     [DbContext(typeof(UPBankEmployeesContext))]
-    [Migration("20240623171610_go1")]
-    partial class go1
+    [Migration("20240624175131_test3")]
+    partial class test3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,7 +24,7 @@ namespace UPBank.Employees.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("UPBank.Models.Person", b =>
+            modelBuilder.Entity("UPBank.Models.Employee", b =>
                 {
                     b.Property<string>("Cpf")
                         .HasColumnType("nvarchar(450)");
@@ -33,12 +33,12 @@ namespace UPBank.Employees.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Discriminator")
+                    b.Property<string>("AgencyNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -47,6 +47,9 @@ namespace UPBank.Employees.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
+
+                    b.Property<bool>("Manager")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -61,23 +64,7 @@ namespace UPBank.Employees.Migrations
 
                     b.HasKey("Cpf");
 
-                    b.ToTable("People", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Person");
-                });
-
-            modelBuilder.Entity("UPBank.Models.Employee", b =>
-                {
-                    b.HasBaseType("UPBank.Models.Person");
-
-                    b.Property<string>("AgencyNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Manager")
-                        .HasColumnType("bit");
-
-                    b.HasDiscriminator().HasValue("Employee");
+                    b.ToTable("Employee");
                 });
 #pragma warning restore 612, 618
         }

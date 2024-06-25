@@ -35,4 +35,8 @@
     <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
