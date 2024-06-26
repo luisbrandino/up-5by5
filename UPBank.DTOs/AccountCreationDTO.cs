@@ -1,5 +1,4 @@
 ﻿using UPBank.Enums;
-using UPBank.Models;
 
 namespace UPBank.DTOs
 {
