@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UPBank.Agencies.APIs.AccountsAPI.Interface;
+﻿using UPBank.Agencies.APIs.AccountsAPI.Interface;
 using UPBank.Agencies.APIs.AddressesAPI.Interface;
 using UPBank.Agencies.APIs.EmployeesAPI.Interface;
-using UPBank.Agencies.Data;
 using UPBank.DTOs;
 using UPBank.Enums;
 using UPBank.Models;
@@ -25,7 +23,7 @@ namespace UPBank.Agencies.Services
         public async void FillData(Agency agency)
         {
             agency.Employees = _employeeService.GetEmployeesByAgencyNumber(agency.Number).Result.ToList();
-            agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode)?? new();
+            agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode) ?? new();
         }
 
         public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);

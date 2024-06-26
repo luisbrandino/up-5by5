@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using UPBank.Agencies.APIs.AccountsAPI.Interface;
+﻿using UPBank.Agencies.APIs.AccountsAPI.Interface;
 using UPBank.Agencies.APIs.Utils;
 using UPBank.Enums;
 using UPBank.Models;

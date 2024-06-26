@@ -7,7 +7,7 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
     public class EmployeeService : IEmployeeService
     {
 
-        private readonly string _Employee = "https://localhost:####/api/Employees/";
+        private readonly string _Employee = "https://localhost:7028/api/Employees/";
 
         public async Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string agencyNumber)
         {
