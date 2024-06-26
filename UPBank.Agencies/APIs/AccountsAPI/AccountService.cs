@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using UPBank.Agencies.APIs.AccountsAPI.Interface;
+using UPBank.Agencies.APIs.Utils;
 using UPBank.Enums;
 using UPBank.Models;
 
@@ -9,29 +10,28 @@ namespace UPBank.Agencies.APIs.AccountsAPI
     {
         private readonly string _Account = "https://localhost:5001/api/Accounts/";
 
-        public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Result.Where(account => account.Restriction));
-
-        public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Result.Where(account => account.Profile == profile));
-
-        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Result.Where(account => account.Overdraft > 0));
-
-        private async Task<IEnumerable<Account>> GetAccountsFromAgency(string agencyNumber)
+        public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber)
         {
-            var url = _Account + agencyNumber;
-            List<Account> accounts = new List<Account>();
-
             using var client = new HttpClient();
-            var response = await client.GetAsync(url);
+            var response = await client.GetAsync(_Account + agencyNumber + "/restricteds");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
+            return await ApiUtils<IEnumerable<Account>>.GetObjectFromResponse(response) ?? new List<Account>();
+        }
 
-                if (!string.IsNullOrEmpty(json))
-                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-            }
+        public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile)
+        {
+            using var client = new HttpClient();
+            var response = await client.GetAsync(_Account + agencyNumber + "/profile/" + profile);
 
-            return accounts;
+            return await ApiUtils<IEnumerable<Account>>.GetObjectFromResponse(response) ?? new List<Account>();
+        }
+
+        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber)
+        {
+            using var client = new HttpClient();
+            var response = await client.GetAsync(_Account + agencyNumber + "/overdraft");
+
+            return await ApiUtils<IEnumerable<Account>>.GetObjectFromResponse(response) ?? new List<Account>();
         }
     }
 }

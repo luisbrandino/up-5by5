@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using UPBank.Agencies.APIs.EmployeesAPI.Interface;
+﻿using UPBank.Agencies.APIs.EmployeesAPI.Interface;
+using UPBank.Agencies.APIs.Utils;
 using UPBank.Models;
 
 namespace UPBank.Agencies.APIs.EmployeesAPI
@@ -9,23 +9,24 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
 
         private readonly string _Employee = "https://localhost:####/api/Employees/";
 
-        public async Task<List<Employee>> GetEmployeesByAgencyNumber(string agencyNumber)
+        public async Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string agencyNumber)
         {
             var url = _Employee + agencyNumber;
-            List<Employee> employees = new List<Employee>();
 
             using var client = new HttpClient();
             var response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
+            return await ApiUtils<IEnumerable<Employee>>.GetObjectFromResponse(response) ?? new List<Employee>();
+        }
 
-                if (!string.IsNullOrEmpty(json))
-                    employees = JsonConvert.DeserializeObject<IEnumerable<Employee>>(json).ToList();
-            }
+        public async Task<Employee> PostManagerEmployee(Employee employee)
+        {
+            var url = _Employee;
 
-            return employees;
+            using var client = new HttpClient();
+            var response = await client.PostAsJsonAsync(url, employee);
+
+            return await ApiUtils<Employee>.GetObjectFromResponse(response) ?? new Employee();
         }
     }
 }
