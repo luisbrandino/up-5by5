@@ -235,9 +235,9 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
-        public async Task<IEnumerable<Account>> GetRestrictedAccounts()
+        public async Task<IEnumerable<Account>> GetRestrictedAccountsFromAgency(string agencyNumber)
         {
-            var accounts = await _context.Account.Where(account => account.Restriction).ToListAsync();
+            var accounts = await _context.Account.Where(account => account.Restriction && account.AgencyNumber == agencyNumber).ToListAsync();
 
             foreach (var account in accounts)
             {
@@ -282,7 +282,7 @@ namespace UPBank.Accounts.Services
                 transaction.OriginNumber == account.Number)
                 .ToListAsync();
 
-            transactions.Select(transaction => transaction.Origin = account);
+            transactions.ForEach(transaction => transaction.Origin = account);
 
             return transactions;
         }
