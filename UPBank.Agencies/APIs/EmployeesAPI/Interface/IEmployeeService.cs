@@ -4,6 +4,8 @@ namespace UPBank.Agencies.APIs.EmployeesAPI.Interface
 {
     public interface IEmployeeService
     {
-        public Task<List<Employee>> GetEmployeesByAgencyNumber(string number);
+        public Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string number);
+
+        public Task<Employee> PostManagerEmployee(Employee employee);
     }
 }

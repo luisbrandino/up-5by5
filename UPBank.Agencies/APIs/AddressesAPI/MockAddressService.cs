@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Reflection.Emit;
-using UPBank.Agencies.APIs.AddressesAPI.Interface;
+﻿using UPBank.Agencies.APIs.AddressesAPI.Interface;
 using UPBank.DTOs;
 using UPBank.Models;
 
@@ -44,9 +42,9 @@ namespace UPBank.Agencies.APIs.AddressesAPI
             });
         }
 
-        public Task<Address?> GetAddressByZipcode(string zipcode) => Task.FromResult(_addresses.FirstOrDefault(address => address.Zipcode == zipcode));
+        public async Task<Address> GetAddressByZipcode(string zipcode) => Task.FromResult(_addresses.FirstOrDefault(address => address.Zipcode == zipcode)).Result ?? new Address();
 
-        public Task<Address?> PostAddressFromDTO(AddressDTO addressDTO)
+        public async Task<Address> PostAddressFromDTO(AddressDTO addressDTO)
         {
             var address = new Address
             {
@@ -64,10 +62,8 @@ namespace UPBank.Agencies.APIs.AddressesAPI
                 if (address.Zipcode != null)
                     _addresses.Add(address);
             }
-            else
-                return Task.FromResult<Address?>(null);
 
-            return Task.FromResult(_addresses.FirstOrDefault(a => a.Zipcode == address.Zipcode));
+            return Task.FromResult(_addresses.FirstOrDefault(a => a.Zipcode == address.Zipcode)).Result ?? new Address();
         }
     }
 }

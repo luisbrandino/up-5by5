@@ -62,6 +62,12 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
             };
         }
 
-        public Task<List<Employee>> GetEmployeesByAgencyNumber(string number) => Task.FromResult(_employees.Where(e => e.AgencyNumber == number).ToList());
+        public async Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string number) => await Task.FromResult(_employees.Where(e => e.AgencyNumber == number).ToList());;
+        
+        public Task<Employee> PostManagerEmployee(Employee employee)
+        {
+            _employees.Add(employee);
+            return Task.FromResult(employee);
+        }
     }
 }
