@@ -58,6 +58,19 @@ namespace UPBank.Accounts.Api.Customer
                 AddressZipcode = null,
                 Address = null,
             },
+            new Models.Customer()
+            {
+                Name = "Test5",
+                BirthDate = DateTime.Now.AddYears(-40),
+                Cpf = "000.000.000-05",
+                Email = "test3@test4.com",
+                Gender = 'M',
+                Phone = "16999998881",
+                Restriction = false,
+                Salary = 2001.99,
+                AddressZipcode = null,
+                Address = null,
+            },
         };
 
         public async Task<IEnumerable<Models.Customer>> Get()

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UPBank.Accounts.Data;
 
@@ -11,9 +12,10 @@ using UPBank.Accounts.Data;
 namespace UPBank.Accounts.Migrations
 {
     [DbContext(typeof(UPBankAccountsContext))]
-    partial class UPBankAccountsContextModelSnapshot : ModelSnapshot
+    [Migration("20240626145102_AddColumnIsMainCustomer")]
+    partial class AddColumnIsMainCustomer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

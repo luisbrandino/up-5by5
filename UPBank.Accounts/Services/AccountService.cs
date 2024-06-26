@@ -71,7 +71,8 @@ namespace UPBank.Accounts.Services
                 AccountCustomer accountCustomer = new AccountCustomer
                 {
                     AccountNumber = account.Number,
-                    CustomerCpf = customer.Cpf
+                    CustomerCpf = customer.Cpf,
+                    IsMainCustomer = customer.Cpf == account.Customers.First().Cpf
                 };
 
                 _context.AccountCustomer.Add(accountCustomer);
@@ -267,6 +268,10 @@ namespace UPBank.Accounts.Services
                 .Where(transaction => transaction.OriginNumber == account.Number)
                 .ToListAsync();
 
+            account.Transactions = new List<Transaction>();
+
+            transactions.ForEach(transaction => transaction.Origin = account);
+
             return transactions;
         }
 
@@ -332,6 +337,25 @@ namespace UPBank.Accounts.Services
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
 
-        public bool CustomerHasAccount(string cpf) => (_context.AccountCustomer?.Any(c => c.CustomerCpf == cpf)).GetValueOrDefault();
+        public async Task<bool> CustomerHasAccount(string cpf)
+        {
+            var accountCustomers = await _context.AccountCustomer?.Where(c => c.CustomerCpf == cpf).ToListAsync();
+
+            if (accountCustomers == null)
+                return false;
+
+            foreach (var accountCustomer in accountCustomers)
+            {
+                if (!accountCustomer.IsMainCustomer)
+                    continue;
+
+                var accountExists = _context.Account?.Any(a => a.Number == accountCustomer.AccountNumber) ?? false;
+
+                if (accountExists)
+                    return true;
+            }
+
+            return false;
+        }
     }
 }
