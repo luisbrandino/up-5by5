@@ -15,8 +15,8 @@ builder.Services.AddDbContext<UPBankAgenciesContext>(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<IAddressService, AddressService>();
-builder.Services.AddSingleton<IEmployeeService, MockEmployeeService>();
-builder.Services.AddSingleton<IAccountService, MockAccountService>();
+builder.Services.AddSingleton<IEmployeeService, EmployeeService>();
+builder.Services.AddSingleton<IAccountService, AccountService>();
 
 builder.Services.AddScoped<AgencyService>();
 

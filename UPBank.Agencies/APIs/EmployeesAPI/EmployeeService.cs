@@ -11,7 +11,7 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
 
         public async Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string agencyNumber)
         {
-            var url = _Employee + "/agency/" + agencyNumber;
+           var url = _Employee + "agency/" + agencyNumber;
 
             using var client = new HttpClient();
             var response = await client.GetAsync(url);
@@ -21,7 +21,7 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
 
         public async Task<Employee> PostManagerEmployee(Employee employee)
         {
-            var url = _Employee + "/hire";
+            var url = _Employee + "hire";
 
             using var client = new HttpClient();
             var response = await client.PostAsJsonAsync(url, employee);

@@ -107,10 +107,6 @@ namespace UPBank.Employees.Controllers
             {
                 var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{employee.AddressZipcode}");
                 employee.Address = address;
-                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agencies/agency/{employee.AgencyNumber}"); // Inserir a porta do endpoint de Agency
-                if (agency != null)
-                    agency.Employees = new List<Employee>();
-                employee.Agency = agency;
             }
 
             return Ok(employees);
