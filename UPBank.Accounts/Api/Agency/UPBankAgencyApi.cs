@@ -5,7 +5,7 @@ namespace UPBank.Accounts.Api.Agency
     public class UPBankAgencyApi : IAgencyApi
     {
         private readonly IConsumer _consumer;
-        private readonly string _url = "";
+        private readonly string _url = "https://localhost:7059/api/agencies";
 
         public UPBankAgencyApi(IConsumer consumer)
         {
@@ -24,7 +24,7 @@ namespace UPBank.Accounts.Api.Agency
 
         public async Task<Models.Agency?> Get(string number)
         {
-            return await _consumer.Get<Models.Agency>(_url + $"/{number}");
+            return await _consumer.Get<Models.Agency>(_url + $"/agency/{number}");
         }
     }
 }

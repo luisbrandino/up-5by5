@@ -22,7 +22,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddScoped<AddNumberOriginToTransactionFilter>();
 
 builder.Services.AddSingleton<ICustomerApi, UPBankCostumerApi>();
-builder.Services.AddSingleton<IAgencyApi, MockAgencyApi>();
+builder.Services.AddSingleton<IAgencyApi, UPBankAgencyApi>();
 builder.Services.AddTransient<IConsumer, HttpClientConsumer>();
 
 builder.Services.AddTransient<AccountService>();
