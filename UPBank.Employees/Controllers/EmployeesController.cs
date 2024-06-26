@@ -221,8 +221,9 @@ namespace UPBank.Employees.Controllers
         {
             // Utilização de Get by Id para operações
             var employee = await ApiConsume<Employee>.Get("https://localhost:7028/api/Employees/", bodyAccount.EmployeeCPF);
-            var client = await ApiConsume<Customer>.Get("https://localhost:7028/api/Clients/", bodyAccount.CustomerCPF);  // Inserir a porta do endpoint de Client
-            var account = await ApiConsume<Account>.Get("https://localhost:7028/api/Account/", bodyAccount.AccountNumber);  // Inserir a porta do endpoint de Client
+            var account = await ApiConsume<Account>.Get("https://localhost:7193/api/Accounts/", bodyAccount.AccountNumber);  // Inserir a porta do endpoint de Client
+
+            var client = account.Customers.First();
 
             if (employee.Manager == false && op == "SetProfile")
             {
