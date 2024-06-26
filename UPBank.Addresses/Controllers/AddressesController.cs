@@ -24,7 +24,7 @@ namespace UPBank.Addresses.Controllers
         {
             return Ok(await _repository.Find());
         }
-
+        
         [HttpGet("zipcode/{zipcode}")]
         public async Task<ActionResult<Address>> Get(string zipcode)
         {

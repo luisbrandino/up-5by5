@@ -31,7 +31,7 @@
             "zipcode": "15990-740",
             "number": "5",
             "street": "Avenida José Gonçalves",
-            "Neighborhood": "Jardim Pereira",
+            "neighborhood": "Jardim Pereira",
             "complement": "Casa A",
             "city": "Matão",
             "state": "SP"

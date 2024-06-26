@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using UPBank.DTOs;
 
 namespace UPBank.Models
 {
     public abstract class Person
     {
+        [Key]
         public string Cpf {  get; set; }
         public string Name { get; set; }
         public DateTime BirthDate { get; set; }
@@ -31,5 +34,19 @@ namespace UPBank.Models
          * 
          * Se não forem usar Entity Framework, podem ignorar as annotations [NotMapped] e [JsonIgnore]
          */
+
+        public Person() { }
+
+        public Person(PersonsDTO dto)
+        {
+            Cpf = dto.Cpf;
+            Name = dto.Name;
+            BirthDate = dto.BirthDate;
+            Gender = dto.Gender;
+            Salary = dto.Salary;
+            Phone = dto.Phone;
+            Email = dto.Email;
+            Address = new Address { Zipcode = dto.Address };
+        }
     }
 }
