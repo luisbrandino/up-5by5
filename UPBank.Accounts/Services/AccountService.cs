@@ -170,6 +170,7 @@ namespace UPBank.Accounts.Services
                 customers.Add(await _customer.Get(customer.CustomerCpf));
 
             account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+            account.Transactions = await _context.Transaction.Where(transaction => transaction.OriginNumber == account.Number).ToListAsync();
             account.Agency = agency;
             account.Customers = customers;
             return account;
@@ -189,6 +190,7 @@ namespace UPBank.Accounts.Services
                     customers.Add(await _customer.Get(customer.CustomerCpf));
 
                 account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+                account.Transactions = await _context.Transaction.Where(transaction => transaction.OriginNumber == account.Number).ToListAsync();
                 account.Customers = customers;
                 account.Agency = agency;
             }
