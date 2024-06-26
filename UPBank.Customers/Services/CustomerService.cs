@@ -71,7 +71,6 @@ namespace UPBank.Customers.Services
                 string requestUri = $"/api/addresses/zipcode/{zipcode}";
 
                 var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
-            addressReturn.Zipcode = zipcode;
 
                 if (addressReturn == null)
                 {
@@ -84,6 +83,10 @@ namespace UPBank.Customers.Services
                         Complement = null,
                     };
                     addressReturn = ApiConsume<Address>.Post(baseUri, requestUri, dto).Result;
+
+                    // se for nulo mesmo apos tentar criar, o cep é invalido
+                    if (addressReturn == null)
+                        throw new Exception("Endereço invalido");
                 }
 
                 addressReturn.Zipcode = zipcode;

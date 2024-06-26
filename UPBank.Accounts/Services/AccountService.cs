@@ -287,6 +287,8 @@ namespace UPBank.Accounts.Services
                 transaction.OriginNumber == account.Number)
                 .ToListAsync();
 
+            account.Transactions = new List<Transaction>();
+
             transactions.ForEach(transaction => transaction.Origin = account);
 
             return transactions;
