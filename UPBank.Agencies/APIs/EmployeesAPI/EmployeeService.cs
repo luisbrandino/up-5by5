@@ -1,6 +1,9 @@
-﻿using UPBank.Agencies.APIs.EmployeesAPI.Interface;
+﻿using System.Text;
+using System;
+using UPBank.Agencies.APIs.EmployeesAPI.Interface;
 using UPBank.Agencies.APIs.Utils;
 using UPBank.Models;
+using Newtonsoft.Json;
 
 namespace UPBank.Agencies.APIs.EmployeesAPI
 {
@@ -24,9 +27,17 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
             var url = _Employee + "hire";
 
             using var client = new HttpClient();
-            var response = await client.PostAsJsonAsync(url, employee);
+            string jsonContent = JsonConvert.SerializeObject(employee);
+            HttpContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            return await ApiUtils<Employee>.GetObjectFromResponse(response) ?? new Employee();
+            HttpResponseMessage response = await client.PostAsync(url, content);
+
+            response.EnsureSuccessStatusCode();
+            string strResponse = response.Content.ReadAsStringAsync().Result;
+
+            var createdEmployee = JsonConvert.DeserializeObject<Employee>(strResponse);
+
+            return createdEmployee;
         }
     }
 }
