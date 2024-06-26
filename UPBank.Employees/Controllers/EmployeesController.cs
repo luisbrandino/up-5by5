@@ -14,9 +14,10 @@ using UPBank.Addresses.PostalServices.Abstract;
 using UPBank.Employees.Data;
 using UPBank.Employees.DTO;
 using UPBank.Employees.Service;
-using UPBank.Employees.Utils;
+using UPBank.Models.Utils;
 using UPBank.Enums;
 using UPBank.Models;
+using UPBank.DTOs;
 
 namespace UPBank.Employees.Controllers
 {
@@ -27,7 +28,7 @@ namespace UPBank.Employees.Controllers
         private readonly UPBankEmployeesContext _context;
         private readonly EmployeeService _employeeService;
         private readonly string _addressEndPoint = "https://localhost:7004";
-        private readonly string _agencyEndPoint = "https://localhost:7004"; // Atualizar Endpoint
+        private readonly string _agencyEndPoint = "https://localhost:7059"; // Atualizar Endpoint
 
         public EmployeesController(UPBankEmployeesContext context)
         {
@@ -49,7 +50,7 @@ namespace UPBank.Employees.Controllers
             {
                 var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{employee.AddressZipcode}");
                 employee.Address = address;
-                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{employee.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agencies/agency/{employee.AgencyNumber}"); // Inserir a porta do endpoint de Agency
                 employee.Agency = agency;
             }
 
@@ -80,11 +81,35 @@ namespace UPBank.Employees.Controllers
 
             if (!string.IsNullOrEmpty(employee.AgencyNumber))
             {
-                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agency/{employee.AgencyNumber}"); // Inserir a rota correta do endpoint de Agency
+                var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agencies/agency/{employee.AgencyNumber}"); // Inserir a rota correta do endpoint de Agency
                 employee.Agency = agency;
             }
 
             return Ok(employee);
+        }
+
+        [HttpGet("agency/{number}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployeesByAgency(string number)
+        {
+            if (_context.Employee == null)
+            {
+                return Problem("Entity Set is null");
+            }
+
+            var employees = await _context.Employee.Where(e => e.AgencyNumber == number).ToListAsync();
+
+            if (employees == null)
+            {
+                return NotFound();
+            }
+
+            foreach (Employee employee in employees)
+            {
+                var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{employee.AddressZipcode}");
+                employee.Address = address;
+            }
+
+            return Ok(employees);
         }
 
         // PUT: api/Employees/5
@@ -143,7 +168,14 @@ namespace UPBank.Employees.Controllers
             }
 
             var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{dto.AddressZipcode}");
-            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{dto.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+
+            if (address == null)
+                address = await ApiConsume<Address>.Post(_addressEndPoint, $"/api/addresses", new AddressDTO { Zipcode = dto.AddressZipcode, Number = 1, Complement = ""});
+
+            if (address == null)
+                return BadRequest($"Invalid zipcode: {dto.AddressZipcode}");
+
+            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agencies/agency/{dto.AgencyNumber}"); // Inserir a porta do endpoint de Agency
             
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             if (!ValidCPF(dto.Cpf))

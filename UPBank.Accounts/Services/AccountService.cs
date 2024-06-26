@@ -199,9 +199,9 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
-        public async Task<IEnumerable<Account>> GetAccountsByProfile(EProfile profile)
+        public async Task<IEnumerable<Account>> GetAccountsByProfile(string number, EProfile profile)
         {
-            var accounts = await _context.Account.Where(account => account.Profile == profile).ToListAsync();
+            var accounts = await _context.Account.Where(account => account.Profile == profile && account.AgencyNumber == number).ToListAsync();
 
             foreach (var account in accounts)
             {
@@ -220,9 +220,9 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
-        public async Task<IEnumerable<Account>> GetAccountsWithActiveLoan()
+        public async Task<IEnumerable<Account>> GetAccountsWithActiveLoan(string number)
         {
-            var activeLoans = await new TransactionService(_context, this).GetActiveLoans();
+            var activeLoans = await new TransactionService(_context, this).GetActiveLoansFromAgency(number);
             var accounts = new List<Account>();
 
             foreach (var activeLoan in activeLoans)
@@ -230,7 +230,7 @@ namespace UPBank.Accounts.Services
                 if (accounts.Any(account => account.Number == activeLoan.OriginNumber))
                     continue;
 
-                accounts.Add(await Get(activeLoan.OriginNumber));
+                accounts.Add(activeLoan.Origin);
             }
 
             return accounts;
