@@ -18,6 +18,8 @@ using UPBank.Models.Utils;
 using UPBank.Enums;
 using UPBank.Models;
 using UPBank.DTOs;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace UPBank.Employees.Controllers
 {
@@ -29,6 +31,7 @@ namespace UPBank.Employees.Controllers
         private readonly EmployeeService _employeeService;
         private readonly string _addressEndPoint = "https://localhost:7004";
         private readonly string _agencyEndPoint = "https://localhost:7059"; // Atualizar Endpoint
+        private readonly string _accountEndPoint = "https://localhost:7193";
 
         public EmployeesController(UPBankEmployeesContext context)
         {
@@ -221,28 +224,38 @@ namespace UPBank.Employees.Controllers
         {
             // Utilização de Get by Id para operações
             var employee = await ApiConsume<Employee>.Get("https://localhost:7028/api/Employees/", bodyAccount.EmployeeCPF);
-            var account = await ApiConsume<Account>.Get("https://localhost:7193/api/Accounts/", bodyAccount.AccountNumber);  // Inserir a porta do endpoint de Client
+            var account = await ApiConsume<Account>.Get(_accountEndPoint, $"api/accounts/{bodyAccount.AccountNumber}");
 
-            var client = account.Customers.First();
-
-            if (employee.Manager == false && op == "SetProfile")
+            var customer = account.Customers.First();
+            if (op == "SetProfile")
             {
-                if(client.Salary <= 1500)
+                if (customer.Salary <= 1500)
                 {
                     account.Profile = EProfile.University;
                 }
-                else if(client.Salary > 1500 && client.Salary <= 10000)
+                else if (customer.Salary > 1500 && customer.Salary <= 10000)
                 {
                     account.Profile = EProfile.Normal;
                 }
-                else if (client.Salary > 10000)
+                else if (customer.Salary > 10000)
                 {
                     account.Profile = EProfile.Vip;
                 }
+
+                HttpClient client = new HttpClient();
+
+                string jsonContent = JsonConvert.SerializeObject(account);
+                HttpContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PutAsync($"{_accountEndPoint}api/accounts/{bodyAccount.AccountNumber}/profile", content);
+                response.EnsureSuccessStatusCode();
             }
             if (employee.Manager == true && op == "ApproveAccount")
             {
                 account.Restriction = !account.Restriction;
+
+                var newAccount = await ApiConsume<Account>.Post(_accountEndPoint, $"api/accounts/{bodyAccount.AccountNumber}/activate", null);
+
             }
 
             return account;
