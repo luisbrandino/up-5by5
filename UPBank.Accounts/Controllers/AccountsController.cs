@@ -269,10 +269,5 @@ namespace UPBank.Accounts.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        private bool AccountExists(string id)
-        {
-            return (_context.Account?.Any(e => e.Number == id)).GetValueOrDefault();
-        }
     }
 }

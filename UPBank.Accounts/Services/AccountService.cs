@@ -267,6 +267,10 @@ namespace UPBank.Accounts.Services
                 .Where(transaction => transaction.OriginNumber == account.Number)
                 .ToListAsync();
 
+            account.Transactions = new List<Transaction>();
+
+            transactions.ForEach(transaction => transaction.Origin = account);
+
             return transactions;
         }
 

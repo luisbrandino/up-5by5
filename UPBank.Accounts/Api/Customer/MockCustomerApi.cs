@@ -67,7 +67,7 @@ namespace UPBank.Accounts.Api.Customer
 
         public async Task<Models.Customer?> Get(string cpf)
         {
-            return await Task.FromResult(_customers.FirstOrDefault(c => c.Cpf == cpf));
+            return await Task.FromResult(_customers.FirstOrDefault(c => c.Cpf.Replace("-", "").Replace(".", "") == cpf.Replace("-", "").Replace(".", "")));
         }
     }
 }
