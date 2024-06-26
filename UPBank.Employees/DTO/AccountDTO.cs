@@ -12,7 +12,6 @@ namespace UPBank.Employees.DTO
         [JsonIgnore]
         public string AgencyNumber { get; set; }
         public string AccountNumber { get; set; }
-        public string CustomerCPF { get; set; }
         public string EmployeeCPF { get; set; }
     }
 }
