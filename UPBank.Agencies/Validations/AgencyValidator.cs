@@ -4,7 +4,7 @@ namespace UPBank.Agencies.Validations
 {
     public class AgencyValidator
     {
-        public bool Validate(Agency agency)
+        public static bool Validate(Agency agency)
         {
             if (agency == null)
                 throw new Exception("Agency value is null.");
@@ -23,8 +23,7 @@ namespace UPBank.Agencies.Validations
 
             return true;
         }
-
-        private bool ValidateCNPJ(string cnpj)
+        private static bool ValidateCNPJ(string cnpj)
         {
             if (cnpj.Length != 14)
                 return false;
@@ -35,7 +34,7 @@ namespace UPBank.Agencies.Validations
             return ValidateDV(cnpj, 1) && ValidateDV(cnpj, 2);
         }
 
-        private bool ValidateDV(string cpf, int dv)
+        private static bool ValidateDV(string cpf, int dv)
         {
             int result = 0;
 
@@ -50,5 +49,6 @@ namespace UPBank.Agencies.Validations
 
             return (result == 0 || result == 1 ? 0 : 11 - result) == int.Parse(cpf.Substring(11 + dv, 1));
         }
+
     }
 }

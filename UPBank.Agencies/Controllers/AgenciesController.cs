@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UPBank.Agencies.Data;
 using UPBank.Agencies.Services;
+using UPBank.Agencies.Data;
 using UPBank.Enums;
 using UPBank.Models;
+using UPBank.Agencies.APIs.EmployeesAPI.Interface;
+using UPBank.Agencies.APIs.AddressesAPI.Interface;
+using UPBank.Agencies.APIs.AccountsAPI.Interface;
+using UPBank.Agencies.Validations;
+using UPBank.DTOs;
 
 namespace UPBank.Agencies.Controllers
 {
@@ -19,10 +19,10 @@ namespace UPBank.Agencies.Controllers
         private readonly UPBankAgenciesContext _context;
         private readonly AgencyService _agencyService;
 
-        public AgenciesController(UPBankAgenciesContext context)
+        public AgenciesController(UPBankAgenciesContext context, AgencyService service)
         {
             _context = context;
-            _agencyService = new AgencyService();
+            _agencyService = service;
         }
 
         [HttpGet]
@@ -31,31 +31,100 @@ namespace UPBank.Agencies.Controllers
             if (_context.Agency == null)
                 return NotFound();
 
-            return await _context.Agency.ToListAsync();
+            List<Agency> agencies = await _context.Agency.ToListAsync();
+
+            foreach (var agency in agencies)
+                _ = Task.Run(() => _agencyService.FillData(agency));
+
+            await Task.WhenAll(agencies.Select(agency => _agencyService.FillData(agency)));
+
+            return agencies;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Agency>> GetAgency(string id)
+        [HttpGet("agency/{agencyNumber}")]
+        public async Task<ActionResult<Agency>> GetAgency(string agencyNumber)
         {
             if (_context.Agency == null)
                 return NotFound();
 
-            var agency = await _context.Agency.FindAsync(id);
+            var agency = await _context.Agency.FirstOrDefaultAsync(a => a.Number == agencyNumber);
 
             if (agency == null)
                 return NotFound();
 
+            await _agencyService.FillData(agency);
+
             return agency;
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAgency(string id, Agency agency)
+        [HttpGet("{agencyNumber}/Restricteds")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetRestrictedAccounts(string agencyNumber)
         {
-            if (id != agency.Number)
+            try
+            {
+                var accounts = await _agencyService.GetRestrictedAccounts(agencyNumber);
+
+                if (!accounts.Any())
+                    return Problem("There are no accounts restricted!");
+
+                return accounts.ToList();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpGet("{agencyNumber}/ByProfile/{profile}")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(string agencyNumber, EProfile profile)
+        {
+            try
+            {
+                var accounts = await _agencyService.GetAccountsByProfile(agencyNumber, profile);
+
+                if (!accounts.Any())
+                    return Problem("There are no accounts that match this profile!");
+
+                return accounts.ToList();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpGet("{agencyNumber}/WithActiveOverdraft")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveOverdraft(string agencyNumber)
+        {
+            try
+            {
+                var accounts = await _agencyService.GetAccountsWithActiveOverdraft(agencyNumber);
+
+                if (!accounts.Any())
+                    return Problem("There are no accounts with active overdraft!");
+
+                return accounts.ToList();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpPut("{agencyNumber}")]
+        public async Task<IActionResult> PutAgency(string agencyNumber, Agency agency)
+        {
+            if (agencyNumber != agency.Number)
                 return BadRequest();
 
-            if (!Validations.CNPJ(agency.Cnpj))
-                return Problem("CNPJ is invalid.");
+            try
+            {
+                AgencyValidator.Validate(agency);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
 
             _context.Entry(agency).State = EntityState.Modified;
 
@@ -65,7 +134,7 @@ namespace UPBank.Agencies.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AgencyExists(id))
+                if (!AgencyExists(agencyNumber))
                     return NotFound();
 
                 else
@@ -76,13 +145,18 @@ namespace UPBank.Agencies.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Agency>> PostAgency(Agency agency)
+        public async Task<ActionResult<Agency>> PostAgency(AgencyDTO dto)
         {
-            if (_context.Agency == null)
-                return Problem("Entity set 'UPBankAgenciesContext.Agency'  is null.");
+            var agency = await _agencyService.CreateAgencyFromDTO(dto);
 
-            if (!Validations.CNPJ(agency.Cnpj))
-                return Problem("CNPJ is invalid.");
+            try
+            {
+                AgencyValidator.Validate(agency);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
 
             _context.Agency.Add(agency);
 
@@ -99,80 +173,57 @@ namespace UPBank.Agencies.Controllers
                     throw;
             }
 
-            return CreatedAtAction("GetAgency", new { id = agency.Number }, agency);
+            return CreatedAtAction("GetAgency", new { agencyNumber = agency.Number }, agency);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAgency(string id)
+        [HttpDelete("{agencyNumber}")]
+        public async Task<IActionResult> DeleteAgency(string agencyNumber)
         {
             if (_context.Agency == null)
                 return NotFound();
 
-            var agency = await _context.Agency.FindAsync(id);
+            var agency = await _context.Agency.FindAsync(agencyNumber);
 
             if (agency == null)
                 return NotFound();
 
             _context.Agency.Remove(agency);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        [HttpGet("Restricteds{agencyNumber}")]
-        public async Task<ActionResult<IEnumerable<Account>>> GetRestrictedAccounts(string agencyNumber)
+        [HttpPatch("{agencyNumber}")]
+        public async Task<IActionResult> PatchAgencyRestriction(string agencyNumber)
         {
+            if (_context.Agency == null)
+                return NotFound();
+
+            var agency = await _context.Agency.FindAsync(agencyNumber);
+
+            if (agency == null)
+                return NotFound();
+
+            agency.Restriction = !agency.Restriction;
+            _context.Entry(agency).State = EntityState.Modified;
+
             try
             {
-                var accounts = await _agencyService.GetAccountsFromAgency(agencyNumber);
-
-                if (!accounts.Any())
-                    return Problem("There are no accounts restricted!");
-
-                return accounts.Where(a => a.Restriction).ToList();
+                await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
             {
-                return Problem(ex.Message);
+                if (!AgencyExists(agencyNumber))
+                    return NotFound();
+
+                else
+                    throw;
             }
+
+            return NoContent();
         }
 
-        [HttpGet("ByProfile{profile}")]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(EProfile profile)
-        {
-            try
-            {
-                var accounts = await _agencyService.GetAccountsByProfile(profile);
-
-                if (!accounts.Any())
-                    return Problem("There are no accounts that match this profile!");
-
-                return (ActionResult)accounts;
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.Message);
-            }
-        }
-
-        [HttpGet("WithActiveOverdraft")]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveOverdraft()
-        {
-            try
-            {
-                var accounts = await _agencyService.GetAccountsWithActiveOverdraft();
-
-                if (!accounts.Any())
-                    return Problem("There are no accounts with active overdraft!");
-
-                return (ActionResult)accounts;
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.Message);
-            }
-        }
-
-        private bool AgencyExists(string id) => (_context.Agency?.Any(e => e.Number == id)).GetValueOrDefault();
+        private bool AgencyExists(string agencyNumber) => (_context.Agency?.Any(e => e.Number == agencyNumber)).GetValueOrDefault();
     }
 }

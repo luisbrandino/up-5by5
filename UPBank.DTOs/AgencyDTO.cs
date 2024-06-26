@@ -7,6 +7,7 @@ namespace UPBank.DTOs
 {
     public class AgencyDTO
     {
+        public string Number { get; set; }
         public string Cnpj { get; set; }
         public Employee Manager { get; set; }
         public AddressDTO Address { get; set; }

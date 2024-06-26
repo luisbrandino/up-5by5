@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\UPBank.DTOs\UPBank.DTOs.csproj" />
     <ProjectReference Include="..\UPBank.Models\UPBank.Models.csproj" />
   </ItemGroup>
 

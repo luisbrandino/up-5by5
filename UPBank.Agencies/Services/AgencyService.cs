@@ -1,4 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Mvc;
+using UPBank.Agencies.APIs.AccountsAPI.Interface;
+using UPBank.Agencies.APIs.AddressesAPI.Interface;
+using UPBank.Agencies.APIs.EmployeesAPI.Interface;
+using UPBank.Agencies.Data;
+using UPBank.DTOs;
 using UPBank.Enums;
 using UPBank.Models;
 
@@ -6,63 +11,54 @@ namespace UPBank.Agencies.Services
 {
     public class AgencyService
     {
-        private readonly string _Account = "https://localhost:####/api/Accounts/";
-    
-        public async Task<IEnumerable<Account>> GetAccountsFromAgency(string agencyNumber)
+        private readonly IEmployeeService _employeeService;
+        private readonly IAddressService _addressService;
+        private readonly IAccountService _accountService;
+
+        public AgencyService(IEmployeeService employeeService, IAddressService addressService, IAccountService accountService)
         {
-            var url = _Account + agencyNumber;
-            List<Account> accounts = new List<Account>();
-
-            using var client = new HttpClient();
-            var response = await client.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                if (!string.IsNullOrEmpty(json))
-                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-            }
-
-            return accounts;
+            _employeeService = employeeService;
+            _addressService = addressService;
+            _accountService = accountService;
         }
 
-        public async Task<IEnumerable<Account>> GetAccountsByProfile(EProfile profile)
+        public async Task<Agency> FillData(Agency agency)
         {
-            var url = _Account + "####" + profile;
-            List<Account> accounts = new List<Account>();
+            agency.Employees = await _employeeService.GetEmployeesByAgencyNumber(agency.Number);
+            agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode)?? new();
 
-            using var client = new HttpClient();
-            var response = await client.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var json = await response.Content.ReadAsStringAsync();
-
-                if (!string.IsNullOrEmpty(json))
-                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-            }
-
-            return accounts;
+            return agency;
         }
 
-        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft()
+        public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);
+
+        public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile) => await _accountService.GetAccountsByProfile(agencyNumber, profile);
+
+        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber) => await _accountService.GetAccountsWithActiveOverdraft(agencyNumber);
+
+        //private async Task<IEnumerable<Account>> GetAccountsFromAgency(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);
+
+        public async Task<Address?> GetAddress(AddressDTO dto)
         {
-            var url = _Account + "WithActiveOverdraft";
-            List<Account> accounts = new List<Account>();
+            var address = await _addressService.GetAddressByZipcode(dto.Zipcode);
 
-            using var client = new HttpClient();
-            var response = await client.GetAsync(url);
+            if (address == null)
+                address = await _addressService.PostAddressFromDTO(dto);
 
-            if (response.IsSuccessStatusCode)
+            return address;
+        }
+
+        public async Task<Agency> CreateAgencyFromDTO(AgencyDTO dto)
+        {
+            return new Agency
             {
-                var json = await response.Content.ReadAsStringAsync();
-
-                if (!string.IsNullOrEmpty(json))
-                    accounts = JsonConvert.DeserializeObject<IEnumerable<Account>>(json).ToList();
-            }
-
-            return accounts;
+                Cnpj = dto.Cnpj,
+                Number = dto.Number,
+                Restriction = false,
+                Employees = new() { dto.Manager },
+                Address = await GetAddress(dto.Address),
+                AddressZipcode = dto.Address.Zipcode
+            };
         }
     }
 }
