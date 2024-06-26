@@ -170,6 +170,7 @@ namespace UPBank.Accounts.Services
                 customers.Add(await _customer.Get(customer.CustomerCpf));
 
             account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+            account.Transactions = await _context.Transaction.Where(transaction => transaction.OriginNumber == account.Number).ToListAsync();
             account.Agency = agency;
             account.Customers = customers;
             return account;
@@ -189,6 +190,7 @@ namespace UPBank.Accounts.Services
                     customers.Add(await _customer.Get(customer.CustomerCpf));
 
                 account.CreditCard = await _creditCardService.Get(account.CreditCardNumber);
+                account.Transactions = await _context.Transaction.Where(transaction => transaction.OriginNumber == account.Number).ToListAsync();
                 account.Customers = customers;
                 account.Agency = agency;
             }
@@ -233,9 +235,9 @@ namespace UPBank.Accounts.Services
             return accounts;
         }
 
-        public async Task<IEnumerable<Account>> GetRestrictedAccounts()
+        public async Task<IEnumerable<Account>> GetRestrictedAccountsFromAgency(string agencyNumber)
         {
-            var accounts = await _context.Account.Where(account => account.Restriction).ToListAsync();
+            var accounts = await _context.Account.Where(account => account.Restriction && account.AgencyNumber == agencyNumber).ToListAsync();
 
             foreach (var account in accounts)
             {
@@ -280,7 +282,7 @@ namespace UPBank.Accounts.Services
                 transaction.OriginNumber == account.Number)
                 .ToListAsync();
 
-            transactions.Select(transaction => transaction.Origin = account);
+            transactions.ForEach(transaction => transaction.Origin = account);
 
             return transactions;
         }
