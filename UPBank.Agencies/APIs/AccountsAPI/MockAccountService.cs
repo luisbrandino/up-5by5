@@ -55,12 +55,10 @@ namespace UPBank.Agencies.APIs.AccountsAPI
             };
         }
 
-        public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Where(a => a.Restriction));
+        public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await Task.FromResult(_accounts.ToList().Where(a => a.Restriction && a.AgencyNumber == agencyNumber));
 
-        public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Where(a => a.Profile == profile));
+        public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile) => await Task.FromResult(_accounts.ToList().Where(a => a.Profile == profile && a.AgencyNumber == agencyNumber));
 
-        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Where(a => a.Overdraft > 0));
-
-        private List<Account> GetAccountsFromAgency(string agencyNumber) => _accounts.Where(a => a.AgencyNumber == agencyNumber).ToList();
+        public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber) => await Task.FromResult(_accounts.ToList().Where(a => a.Overdraft > 0 && a.AgencyNumber == agencyNumber));
     }
 }
