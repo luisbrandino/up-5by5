@@ -200,7 +200,7 @@ namespace UPBank.Employees.Controllers
             #endregion
             _context.Employee.Add(employee);
             await _context.SaveChangesAsync();
-            return Ok($"Funcionário: {dto.Name} incluído no sistema");
+            return Ok(employee);
         }
 
 
