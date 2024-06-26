@@ -618,7 +618,7 @@
 }
 ```
 
-### 13. Excluir uma conta
+### 14. Excluir uma conta
 
 - **Endpoint**: DELETE /api/accounts/{number}
 - **Descrição**: Remove uma conta transferindo-a para uma tabela de contas deletadas
