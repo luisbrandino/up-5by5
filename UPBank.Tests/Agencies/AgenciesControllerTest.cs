@@ -125,7 +125,7 @@ namespace UPBank.Tests.Agencies
                 {
                     Number = "101",
                     Cnpj = "12345678901234",
-                    Manager = new Employee
+                    Manager = new AgencyCreationEmployeeDTO
                     { 
                         Name = "Manager", 
                         Manager = true 
@@ -148,7 +148,7 @@ namespace UPBank.Tests.Agencies
                         Number = 1,
                         Complement = "Home"
                     },
-                    Manager = new Employee
+                    Manager = new AgencyCreationEmployeeDTO
                     {
                         Name = "Manager",
                         Manager = true

@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Text.Json.Serialization;
-using UPBank.Models;
 
 namespace UPBank.DTOs
 {
@@ -9,7 +8,7 @@ namespace UPBank.DTOs
     {
         public string Number { get; set; }
         public string Cnpj { get; set; }
-        public Employee Manager { get; set; }
+        public AgencyCreationEmployeeDTO Manager { get; set; }
         public AddressDTO Address { get; set; }
     }
 }

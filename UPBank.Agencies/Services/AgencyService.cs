@@ -48,12 +48,27 @@ namespace UPBank.Agencies.Services
 
         public async Task<Agency> CreateAgencyFromDTO(AgencyDTO dto)
         {
+            var manager = new Employee
+            {
+                Cpf = dto.Manager.Cpf,
+                BirthDate = dto.Manager.BirthDate,
+                AgencyNumber = dto.Manager.AgencyNumber,
+                Email = dto.Manager.Email,
+                AddressZipcode = dto.Manager.AddressZipcode,
+                Gender = dto.Manager.Gender,
+                Name = dto.Manager.Name,
+                Phone = dto.Manager.Phone,
+                Manager = true,
+                Salary = dto.Manager.Salary,
+                Register = dto.Manager.Register,
+            };
+
             return new Agency
             {
                 Cnpj = dto.Cnpj,
                 Number = dto.Number,
                 Restriction = false,
-                Employees = new() { dto.Manager },
+                Employees = new() { manager },
                 Address = await GetAddress(dto.Address),
                 AddressZipcode = dto.Address.Zipcode
             };
