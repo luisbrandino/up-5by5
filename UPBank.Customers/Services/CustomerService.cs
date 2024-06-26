@@ -28,7 +28,7 @@ namespace UPBank.Customers.Services
         public async Task<Customer> PostCustomer(CustomersDTO dto)
         {
             Customer customer = new Customer(dto);
-            customer.Address = returnAddress(dto.Address);
+            customer.Address = returnAddress(dto.Address, dto.AddressNumber);
 
             if (RestoreCustomer(customer))
             {
@@ -48,7 +48,7 @@ namespace UPBank.Customers.Services
         public async Task<bool> EditCustomer(CustomersDTO dto)
         {
             Customer updatedCustomer = new Customer(dto);
-            updatedCustomer.Address = returnAddress(dto.Address);
+            updatedCustomer.Address = returnAddress(dto.Address, dto.AddressNumber);
 
            
             return await _customerRepository.EditCustomer(updatedCustomer);
@@ -63,19 +63,38 @@ namespace UPBank.Customers.Services
         {
             return await _customerRepository.ChangeRestriction(cpf);
         }
-        private Address returnAddress(string zipcode)
+        private Address returnAddress(string zipcode, int number)
         {
-            string baseUri = "https://localhost:7004";
-            string requestUri = $"/api/addresses/zipcode/{zipcode}";
+            try
+            {
+                string baseUri = "https://localhost:7004";
+                string requestUri = $"/api/addresses/zipcode/{zipcode}";
 
-            var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
+                var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
             addressReturn.Zipcode = zipcode;
 
-            if(addressReturn == null)
+                if (addressReturn == null)
+                {
+                    requestUri = $"/api/addresses";
+
+                    AddressDTO dto = new AddressDTO()
+                    {
+                        Zipcode = zipcode,
+                        Number = number,
+                        Complement = null,
+                    };
+                    addressReturn = ApiConsume<Address>.Post(baseUri, requestUri, dto).Result;
+                }
+
+                addressReturn.Zipcode = zipcode;
+
+                return addressReturn;
+
+            } catch (Exception ex)
             {
-                throw new Exception("Erro ao recuperar Endereço");
+                throw new Exception("Endereço invalido");
             }
-            return addressReturn;
+          
         }
 
         private bool IsCustomerUnique(Customer customer)

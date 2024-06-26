@@ -18,5 +18,6 @@ namespace UPBank.DTOs
         public string Phone { get; set; }
         public string Email { get; set; }
         public string Address { get; set; }
+        public int AddressNumber { get; set; }
     }
 }

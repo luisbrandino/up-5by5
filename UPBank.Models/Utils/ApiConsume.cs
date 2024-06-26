@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -34,5 +35,35 @@ namespace UPBank.Models.Utils
 
             return generics;
         }
+
+        public static async Task<T?> Post(string uri, string requestUri, dynamic postData)
+        {
+            T? generics;
+
+            try
+            {
+                using HttpClient client = new();
+
+                string jsonContent = JsonConvert.SerializeObject(postData);
+                HttpContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PostAsync(uri + requestUri, content);
+
+                response.EnsureSuccessStatusCode();
+                string strResponse = response.Content.ReadAsStringAsync().Result;
+
+                generics = JsonConvert.DeserializeObject<T>(strResponse);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+
+            if (generics == null)
+                return default;
+
+            return generics;
+        }
+
     }
 }

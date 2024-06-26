@@ -55,7 +55,7 @@ namespace UPBank.Models
 
         public static readonly string RemoveRestriction = "UPDATE Customer SET Restriction = 0 WHERE Cpf = @Cpf";
         public static readonly string AddRestriction = "UPDATE Customer SET Restriction = 1 WHERE Cpf = @Cpf";
-        public bool Restriction = true;
+        public bool Restriction { get; set; } = true;
 
         public Customer() { }
 

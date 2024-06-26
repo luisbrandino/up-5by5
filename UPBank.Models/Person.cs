@@ -20,7 +20,7 @@ namespace UPBank.Models
         public Address Address { get; set; }
 
         [JsonIgnore]
-        public string AddressZipcode { get; set; }
+        public string? AddressZipcode { get; set; }
 
         /* 
          * Como vocês vão ter que pegar endereço de outro banco de dados, é preciso que 
