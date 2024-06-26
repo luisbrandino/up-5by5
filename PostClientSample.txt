@@ -1,0 +1,14 @@
+{
+    "Cpf": "57799222093",
+    "Name": "Claúdio",
+    "BirthDate": "2001-05-15",
+    "Gender": "M",
+    "Salary": 12000.00,
+    "Phone": "(16)98839-6290",
+    "Email": "Claudio@example.com",
+    "Address": "14807-031",
+     "AddressNumber": 300  
+}
+
+
+POST CLIENTE

@@ -26,8 +26,10 @@ namespace UPBank.Employees.Controllers
     {
         private readonly UPBankEmployeesContext _context;
         private readonly EmployeeService _employeeService;
-        private readonly string _addressEndPoint = "https://localhost:7004";
-        private readonly string _agencyEndPoint = "https://localhost:7004"; // Atualizar Endpoint
+        private readonly string _addressEndPoint = "https://localhost:7004/";
+        private readonly string _agencyEndPoint = "https://localhost:7059/";
+        private readonly string _clientEndPoint = "https://localhost:7136/";
+        private readonly string _accountEndPoint = "https://localhost:7193/";
 
         public EmployeesController(UPBankEmployeesContext context)
         {
@@ -141,9 +143,8 @@ namespace UPBank.Employees.Controllers
             {
                 return Problem("Entity set 'FlightsApiContext.Flights' is null.");
             }
-
             var address = await ApiConsume<Address>.Get(_addressEndPoint, $"api/addresses/zipcode/{dto.AddressZipcode}");
-            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/.../{dto.AgencyNumber}"); // Inserir a porta do endpoint de Agency
+            var agency = await ApiConsume<Agency>.Get(_agencyEndPoint, $"api/agency/{dto.AgencyNumber}"); 
             
             dto.Cpf = new string(dto.Cpf.Where(char.IsDigit).ToArray());
             if (!ValidCPF(dto.Cpf))
@@ -189,8 +190,8 @@ namespace UPBank.Employees.Controllers
         {
             // Utilização de Get by Id para operações
             var employee = await ApiConsume<Employee>.Get("https://localhost:7028/api/Employees/", bodyAccount.EmployeeCPF);
-            var client = await ApiConsume<Customer>.Get("https://localhost:7028/api/Clients/", bodyAccount.CustomerCPF);  // Inserir a porta do endpoint de Client
-            var account = await ApiConsume<Account>.Get("https://localhost:7028/api/Account/", bodyAccount.AccountNumber);  // Inserir a porta do endpoint de Client
+            var client = await ApiConsume<Customer>.Get(_clientEndPoint, $"api/customers/{bodyAccount.CustomerCPF}"); 
+            var account = await ApiConsume<Account>.Get(_accountEndPoint, $"api/account/{bodyAccount.AccountNumber}"); 
 
             if (employee.Manager == false && op == "SetProfile")
             {

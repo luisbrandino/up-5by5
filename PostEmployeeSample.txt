@@ -1,0 +1,29 @@
+{
+  "Cpf": "61235000079",
+  "Name": "João Silva",
+  "Gender": "M",
+  "Salary": 5000.00,
+  "Phone": "11987654321",
+  "Email": "joao.silva@example.com",
+  "BirthDate": "2000-01-01",
+  "AddressZipcode": "14805-295",
+  "Manager": true,
+  "AgencyNumber": "001"
+}
+
+
+{
+  "Cpf": "24009944048",
+  "Name": "Joana Silva",
+  "Gender": "F",
+  "Salary": 1500.00,
+  "Phone": "11987654322",
+  "Email": "joana.silva@example.com",
+  "BirthDate": "1995-01-01",
+  "AddressZipcode": "14805-295",
+  "Manager": false,
+  "AgencyNumber": "001"
+}
+
+
+Post Employee
