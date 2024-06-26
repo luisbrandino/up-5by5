@@ -47,7 +47,7 @@ namespace UPBank.Accounts.Specifications
             if (age <= 18)
                 throw new Exception("O primeiro cliente da conta deve ser maior de idade");
 
-            if (_service.CustomerHasAccount(firstCustomer.Cpf))
+            if (_service.CustomerHasAccount(firstCustomer.Cpf).Result)
                 throw new Exception("Cliente já possui conta");
         }
     }

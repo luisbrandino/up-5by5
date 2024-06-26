@@ -337,17 +337,23 @@ namespace UPBank.Accounts.Services
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
 
-        public bool CustomerHasAccount(string cpf)
+        public async Task<bool> CustomerHasAccount(string cpf)
         {
-            var accountCustomer = _context.AccountCustomer?.FirstOrDefault(c => c.CustomerCpf == cpf);
+            var accountCustomers = await _context.AccountCustomer?.Where(c => c.CustomerCpf == cpf).ToListAsync();
 
-            if (accountCustomer == null)
+            if (accountCustomers == null)
                 return false;
 
-            var accountExists = _context.Account?.Any(a => a.Number == accountCustomer.AccountNumber) ?? false;
-            
-            if (accountExists)
-                return true;
+            foreach (var accountCustomer in accountCustomers)
+            {
+                if (!accountCustomer.IsMainCustomer)
+                    continue;
+
+                var accountExists = _context.Account?.Any(a => a.Number == accountCustomer.AccountNumber) ?? false;
+
+                if (accountExists)
+                    return true;
+            }
 
             return false;
         }
