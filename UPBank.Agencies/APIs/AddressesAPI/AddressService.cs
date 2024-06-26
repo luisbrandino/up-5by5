@@ -18,7 +18,7 @@ namespace UPBank.Agencies.APIs.AddressesAPI
             using var client = new HttpClient();
             var response = await client.GetAsync(url);
 
-            return await Deserialize(response);
+            return await GetAddressFromResponse(response);
         }
 
         public async Task<Address?> PostAddressFromDTO(AddressDTO addressDTO)
@@ -28,10 +28,10 @@ namespace UPBank.Agencies.APIs.AddressesAPI
             using var client = new HttpClient();
             var response = await client.PostAsJsonAsync(url, addressDTO);
 
-            return await Deserialize(response);
+            return await GetAddressFromResponse(response);
         }
 
-        private async Task<Address?> Deserialize(HttpResponseMessage response)
+        private async Task<Address?> GetAddressFromResponse(HttpResponseMessage response)
         {
             Address? address = null;
 
