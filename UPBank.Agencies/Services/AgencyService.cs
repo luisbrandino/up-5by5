@@ -34,8 +34,6 @@ namespace UPBank.Agencies.Services
 
         public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber) => await _accountService.GetAccountsWithActiveOverdraft(agencyNumber);
 
-        //private async Task<IEnumerable<Account>> GetAccountsFromAgency(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);
-
         public async Task<Address?> GetAddress(AddressDTO dto)
         {
             var address = await _addressService.GetAddressByZipcode(dto.Zipcode);
@@ -65,7 +63,7 @@ namespace UPBank.Agencies.Services
 
             return new Agency
             {
-                Cnpj = dto.Cnpj,
+                Cnpj = dto.Cnpj.Replace("/", "").Replace(".", "").Replace("-", ""),
                 Number = dto.Number,
                 Restriction = false,
                 Employees = new() { _employeeService.PostManagerEmployee(manager).Result },

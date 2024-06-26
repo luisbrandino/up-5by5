@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UPBank.Agencies.Services;
 using UPBank.Agencies.Data;
-using UPBank.Enums;
-using UPBank.Models;
-using UPBank.Agencies.APIs.EmployeesAPI.Interface;
-using UPBank.Agencies.APIs.AddressesAPI.Interface;
-using UPBank.Agencies.APIs.AccountsAPI.Interface;
+using UPBank.Agencies.Services;
 using UPBank.Agencies.Validations;
 using UPBank.DTOs;
+using UPBank.Enums;
+using UPBank.Models;
 
 namespace UPBank.Agencies.Controllers
 {
