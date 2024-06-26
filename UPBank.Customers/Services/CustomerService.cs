@@ -65,17 +65,35 @@ namespace UPBank.Customers.Services
         }
         private Address returnAddress(string zipcode)
         {
-            string baseUri = "https://localhost:7004";
-            string requestUri = $"/api/addresses/zipcode/{zipcode}";
-
-            var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
-            addressReturn.Zipcode = zipcode;
-
-            if(addressReturn == null)
+            try
             {
-                throw new Exception("Erro ao recuperar Endereço");
+                string baseUri = "https://localhost:7004";
+                string requestUri = $"/api/addresses/zipcode/{zipcode}";
+
+                var addressReturn = ApiConsume<Address>.Get(baseUri, requestUri).Result;
+
+                if (addressReturn == null)
+                {
+                    requestUri = $"/api/addresses";
+
+                    AddressDTO dto = new AddressDTO()
+                    {
+                        Zipcode = zipcode,
+                        Number = 1,
+                        Complement = null,
+                    };
+                    addressReturn = ApiConsume<Address>.Post(baseUri, requestUri, dto).Result;
+                }
+
+                addressReturn.Zipcode = zipcode;
+
+                return addressReturn;
+
+            } catch (Exception ex)
+            {
+                throw new Exception("Endereço invalido");
             }
-            return addressReturn;
+          
         }
 
         private bool IsCustomerUnique(Customer customer)
