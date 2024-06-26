@@ -78,11 +78,11 @@ namespace UPBank.Accounts.Controllers
         }
 
         [HttpGet("agency/{number}/profile/{profile}")]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(string agency, EProfile profile)
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(string number, EProfile profile)
         {
             try
             {
-                return (await _service.GetAccountsByProfile(agency, profile)).ToList();
+                return (await _service.GetAccountsByProfile(number, profile)).ToList();
             }
             catch (Exception e)
             {
@@ -90,7 +90,7 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpGet("/agency/{number}/activeloans")]
+        [HttpGet("agency/{number}/activeloans")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveLoan(string number)
         {
             try
