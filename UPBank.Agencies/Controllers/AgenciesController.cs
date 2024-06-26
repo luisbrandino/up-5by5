@@ -34,9 +34,7 @@ namespace UPBank.Agencies.Controllers
             List<Agency> agencies = await _context.Agency.ToListAsync();
 
             foreach (var agency in agencies)
-                _ = Task.Run(() => _agencyService.FillData(agency));
-
-            await Task.WhenAll(agencies.Select(agency => _agencyService.FillData(agency)));
+                _agencyService.FillData(agency);
 
             return agencies;
         }
@@ -52,7 +50,7 @@ namespace UPBank.Agencies.Controllers
             if (agency == null)
                 return NotFound();
 
-            await _agencyService.FillData(agency);
+            _agencyService.FillData(agency);
 
             return agency;
         }

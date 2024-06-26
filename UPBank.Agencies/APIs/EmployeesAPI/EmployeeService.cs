@@ -9,7 +9,6 @@ namespace UPBank.Agencies.APIs.EmployeesAPI
 
         private readonly string _Employee = "https://localhost:####/api/Employees/";
 
-
         public async Task<List<Employee>> GetEmployeesByAgencyNumber(string agencyNumber)
         {
             var url = _Employee + agencyNumber;

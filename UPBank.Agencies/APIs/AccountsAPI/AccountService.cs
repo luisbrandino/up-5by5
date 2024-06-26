@@ -7,7 +7,7 @@ namespace UPBank.Agencies.APIs.AccountsAPI
 {
     public class AccountService : IAccountService
     {
-        private readonly string _Account = "https://localhost5001/api/Accounts/";
+        private readonly string _Account = "https://localhost:5001/api/Accounts/";
 
         public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await Task.FromResult(GetAccountsFromAgency(agencyNumber).Result.Where(account => account.Restriction));
 
