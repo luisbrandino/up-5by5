@@ -46,7 +46,7 @@ namespace UPBank.Accounts.Services
                 Customers = customers,
                 Profile = requestedAccount.Profile,
                 CreationDate = DateTime.Now,
-                Balance = 2000,
+                Balance = 0,
                 Restriction = true,
             };
 
@@ -329,5 +329,7 @@ namespace UPBank.Accounts.Services
         }
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
+
+        public bool CustomerHasAccount(string cpf) => (_context.AccountCustomer?.Any(c => c.CustomerCpf == cpf)).GetValueOrDefault();
     }
 }

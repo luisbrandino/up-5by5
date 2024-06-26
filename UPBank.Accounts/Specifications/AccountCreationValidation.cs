@@ -1,4 +1,5 @@
-﻿using UPBank.Accounts.Data;
+﻿using Humanizer;
+using UPBank.Accounts.Data;
 using UPBank.Accounts.Services;
 using UPBank.Accounts.Specifications.Abstract;
 using UPBank.Models;
@@ -45,6 +46,9 @@ namespace UPBank.Accounts.Specifications
 
             if (age <= 18)
                 throw new Exception("O primeiro cliente da conta deve ser maior de idade");
+
+            if (_service.CustomerHasAccount(firstCustomer.Cpf))
+                throw new Exception("Cliente já possui conta");
         }
     }
 }

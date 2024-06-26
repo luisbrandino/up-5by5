@@ -12,6 +12,9 @@ namespace UPBank.Accounts.Specifications
 
             if (transaction.Origin == null)
                 throw new Exception("Conta de origem não cadastrada");
+
+            if (transaction.Origin.Restriction)
+                throw new Exception("Conta de origem está restringida");
         }
     }
 
