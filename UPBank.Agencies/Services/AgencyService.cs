@@ -24,7 +24,7 @@ namespace UPBank.Agencies.Services
 
         public async void FillData(Agency agency)
         {
-            agency.Employees = await _employeeService.GetEmployeesByAgencyNumber(agency.Number);
+            agency.Employees = _employeeService.GetEmployeesByAgencyNumber(agency.Number).Result.ToList();
             agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode)?? new();
         }
 
@@ -68,7 +68,7 @@ namespace UPBank.Agencies.Services
                 Cnpj = dto.Cnpj,
                 Number = dto.Number,
                 Restriction = false,
-                Employees = new() { manager },
+                Employees = new() { _employeeService.PostManagerEmployee(manager).Result },
                 Address = await GetAddress(dto.Address),
                 AddressZipcode = dto.Address.Zipcode
             };

@@ -12,7 +12,7 @@ namespace UPBank.Agencies.Validations
             if (ValidateCNPJ(agency.Cnpj) == false)
                 throw new Exception("Agency CNPJ is invalid.");
 
-            if (agency.Address == null)
+            if (string.IsNullOrEmpty(agency.Address.Street))
                 throw new Exception("Agency address is invalid.");
 
             if (agency.Employees.Count == 0)
