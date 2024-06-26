@@ -46,7 +46,7 @@ namespace UPBank.Accounts.Services
                 Customers = customers,
                 Profile = requestedAccount.Profile,
                 CreationDate = DateTime.Now,
-                Balance = 2000,
+                Balance = 0,
                 Restriction = true,
             };
 

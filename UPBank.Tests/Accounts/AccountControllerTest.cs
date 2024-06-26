@@ -35,7 +35,7 @@ namespace UPBank.Tests.Accounts
                 Number = "123456789",
                 CreditCardNumber = 2020,
                 Balance = 2000,
-                Restriction = true
+                Restriction = false
             });
 
             context.Transaction.Add(new Transaction
@@ -74,7 +74,7 @@ namespace UPBank.Tests.Accounts
                 Number = "505020",
                 CreditCardNumber = 1111,
                 Balance = 1111,
-                Restriction = true
+                Restriction = false
             });
 
             context.CreditCard.Add(new CreditCard
