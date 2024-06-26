@@ -28,7 +28,7 @@ namespace UPBank.Customers.Services
         public async Task<Customer> PostCustomer(CustomersDTO dto)
         {
             Customer customer = new Customer(dto);
-            customer.Address = returnAddress(dto.Address);
+            customer.Address = returnAddress(dto.Address, dto.AddressNumber);
 
             if (RestoreCustomer(customer))
             {
@@ -48,7 +48,7 @@ namespace UPBank.Customers.Services
         public async Task<bool> EditCustomer(CustomersDTO dto)
         {
             Customer updatedCustomer = new Customer(dto);
-            updatedCustomer.Address = returnAddress(dto.Address);
+            updatedCustomer.Address = returnAddress(dto.Address, dto.AddressNumber);
 
            
             return await _customerRepository.EditCustomer(updatedCustomer);
@@ -63,7 +63,7 @@ namespace UPBank.Customers.Services
         {
             return await _customerRepository.ChangeRestriction(cpf);
         }
-        private Address returnAddress(string zipcode)
+        private Address returnAddress(string zipcode, int number)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace UPBank.Customers.Services
                     AddressDTO dto = new AddressDTO()
                     {
                         Zipcode = zipcode,
-                        Number = 1,
+                        Number = number,
                         Complement = null,
                     };
                     addressReturn = ApiConsume<Address>.Post(baseUri, requestUri, dto).Result;

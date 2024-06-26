@@ -44,7 +44,7 @@ namespace UPBank.Customers.Repositories
                     Salary = Convert.ToDouble(row.Salary),
                     Phone = FormatPhone(row.Phone),
                     Email = row.Email,
-                    Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),
+                    Address = addressResult.FirstOrDefault(a => a.Zipcode == row.Address),         
                     Restriction = row.Restriction,
                 };
 
