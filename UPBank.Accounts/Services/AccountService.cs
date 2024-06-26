@@ -71,7 +71,8 @@ namespace UPBank.Accounts.Services
                 AccountCustomer accountCustomer = new AccountCustomer
                 {
                     AccountNumber = account.Number,
-                    CustomerCpf = customer.Cpf
+                    CustomerCpf = customer.Cpf,
+                    IsMainCustomer = customer.Cpf == account.Customers.First().Cpf
                 };
 
                 _context.AccountCustomer.Add(accountCustomer);
@@ -336,6 +337,19 @@ namespace UPBank.Accounts.Services
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
 
-        public bool CustomerHasAccount(string cpf) => (_context.AccountCustomer?.Any(c => c.CustomerCpf == cpf)).GetValueOrDefault();
+        public bool CustomerHasAccount(string cpf)
+        {
+            var accountCustomer = _context.AccountCustomer?.FirstOrDefault(c => c.CustomerCpf == cpf);
+
+            if (accountCustomer == null)
+                return false;
+
+            var accountExists = _context.Account?.Any(a => a.Number == accountCustomer.AccountNumber) ?? false;
+            
+            if (accountExists)
+                return true;
+
+            return false;
+        }
     }
 }
