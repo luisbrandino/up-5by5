@@ -317,7 +317,7 @@
 - **Sample**:
     - NoContent
 
-### 6. Post agency
+### 7. Post agency
 
 - **Endpoint**: `POST /api/agencies/`
 - **Description**: Try to validate and then create a new agency, if it exists in deleted agencies context, remove too.
@@ -326,8 +326,22 @@
 - **Request body**:
     ```json
         {
+            "Number": "001",
             "cnpj": "12345678901234",
             "restriction": false,
+            "Manager": {
+                "CPF": "61235000079",
+                "Name": "João Silva","
+                "BirthDate": "2000-01-01",
+                "Gender": 'M',
+                "Salary": 5000.00,"
+                "Phone": "11987654321",
+                "Email": "joaosilva@example.com"
+                "Register": "1",
+                "AgencyNumber": "001",
+                "Manager": true,"
+                "AddressZipcode": "14805-295",
+            }
             "address": {
                 "zipcode": "15990-540",
                 "number": "5",
@@ -366,7 +380,7 @@
         }
     ```
 
-### 7. Delete agency
+### 8. Delete agency
 - **Endpoint**: `DELETE /api/agencies/agencynumber`
 - **Description**: Delete a agency by agency number, if registered, and saves in deleted agencies context.
 - **Parameters**:
@@ -374,7 +388,7 @@
 - **Sample**:
 	- NoContent
 
-### 8. Patch agency restriction
+### 9. Patch agency restriction
 - **Endpoint**: `PATCH /api/agencies/agencynumber/`
 - **Description**: Verify if agency exists and update restriction status.
 - **Parameters**:
