@@ -7,7 +7,7 @@
 - **Endpoint**: GET /api/accounts
 - **Descrição**: Retorna todas as contas cadastradas.
 - **Parâmetros**: Nenhum.
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
   
 ```json
 [
@@ -67,7 +67,7 @@
 - **Endpoint**: GET /api/accounts/{number}
 - **Descrição**: Retorna uma conta com base no número da conta.
 - **Parâmetros**: Nenhum.
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
     {
         "number": "031262",
@@ -124,7 +124,7 @@
 - **Descrição**: Retorna todas as contas que estão restritas.
 - **Parâmetros**:
     - **number**: string
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 [
   {
@@ -178,7 +178,7 @@
         - 1. Universitary;
         - 2. Normal;
         - 3. Vip
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 {
     "number": "031262",
@@ -225,7 +225,7 @@
 - **Endpoint**: GET /api/accounts/activeloans
 - **Descrição**: Retorna todas as contas que possuem empréstimos ativos.
 - **Parâmetros**: Nenhum.
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 [
   {
@@ -291,7 +291,7 @@
         - 3. Loan;
         - 4. Transfer;
         - 5. Payment
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 [
     {
@@ -348,7 +348,7 @@
 - **Descrição**: Retorna todas as transações da conta
 - **Parâmetros**:
     - **number**: string
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 [
     {
@@ -406,7 +406,7 @@
 - **Descrição**: Retorna o saldo atual da conta especificada
 - **Parâmetros**:
     - **number**: string
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 {
     "Balance": 4000
@@ -424,7 +424,7 @@
     "overdraft": 1500 // opcional
 }
 ```
-- **Exemplo de Resposta**:
+- **Exemplo de resposta**:
 ```json
 {
     "number": "031262",
@@ -480,23 +480,159 @@
     "AgencyNumber": "10001"
     "IsSavingsAccount": false // verdadeiro se for conta poupança, falso se não for
     "Customers": [
-        "000.000.000-01"
+        "000.000.000-01" // mínimo 1, máximo 2
     ] // apenas CPF
 }
 ```
 - **Exemplo de resposta:**
 ```json
 {
-    "number": "031262",
+    "number": "077998",
+    "restriction": true,
+    "overdraft": 500,
+    "profile": 1,
+    "creationDate": "2024-06-26T12:10:15.278917-03:00",
+    "balance": 0,
+    "savingsAccount": null,
+    "creditCard": {
+        "number": 44523957313602,
+        "extractionDate": "2034-06-26T12:10:15.2865474-03:00",
+        "limit": 500,
+        "cvv": "097",
+        "holder": "Test",
+        "brand": "Visa",
+        "active": false
+    },
+    "agency": {
+        "number": "10001",
+        "cnpj": "101.202.2021/22",
+        "restriction": false,
+        "employees": [],
+        "address": null
+    },
+    "transactions": null,
+    "customers": [
+        {
+            "cpf": "000.000.000-01",
+            "name": "Test",
+            "birthDate": "2004-06-26T12:08:46.043491-03:00",
+            "gender": "M",
+            "salary": 1500.99,
+            "phone": "16999998888",
+            "email": "test@test.com",
+            "address": null
+        }
+    ]
+}
+```
+
+### 11. Ativar uma conta
+
+- **Endpoint**: POST /api/accounts/{number}/activate
+- **Descrição**: Ativa uma conta
+- **Parâmetros**:
+    - **number**: string
+- **Exemplo de resposta:**
+```json
+{
+    "number": "077998",
     "restriction": false,
-    "overdraft": 1500,
-    "profile": 2,
-    "creationDate": "2024-06-25T17:12:38.7307024",
-    "balance": 2200,
+    "overdraft": 500,
+    "profile": 1,
+    "creationDate": "2024-06-26T12:10:15.278917",
+    "balance": 0,
     "savingsAccount": null,
     "creditCard": null,
     "agency": null,
     "transactions": null,
     "customers": null
+}
+```
+
+### 12. Ativar cartão de crédito de uma conta
+
+- **Endpoint**: POST /api/accounts/{number}/creditcard/activate
+- **Descrição**: Ativa o cartão de crédito de uma conta
+- **Parâmetros**:
+    - **number**: string
+- **Exemplo de resposta:**
+```json
+{
+    "number": 44523957313602,
+    "extractionDate": "2034-06-26T12:10:15.2865474",
+    "limit": 500,
+    "cvv": "097",
+    "holder": "Test",
+    "brand": "Visa",
+    "active": true
+}
+```
+
+### 13. Fazer uma transação
+
+- **Endpoint**: POST /api/accounts/{number}/transactions
+- **Descrição**: Cria uma nova transação em uma conta
+- **Parâmetros**:
+    - **number**: string
+- **Corpo da requisição**:
+```json
+{
+    "type": 4, // (1 até 5)
+    "value": 500,
+    "destinyNumber": "077998" // apenas necessário se o tipo da transação for transfêrencia (tipo 4)
+}
+```
+- **Exemplo de resposta:**
+```json
+{
+    "id": 1013,
+    "effectiveDate": "2024-06-26T12:19:20.937217-03:00",
+    "type": 4,
+    "value": 500,
+    "origin": {
+        "number": "085787",
+        "restriction": false,
+        "overdraft": 500,
+        "profile": 1,
+        "creationDate": "2024-06-26T09:22:11.8877561",
+        "balance": 27600,
+        "savingsAccount": null,
+        "creditCard": null,
+        "agency": null,
+        "transactions": null,
+        "customers": null
+    },
+    "destiny": {
+        "number": "077998",
+        "restriction": false,
+        "overdraft": 500,
+        "profile": 1,
+        "creationDate": "2024-06-26T12:10:15.278917",
+        "balance": 600,
+        "savingsAccount": null,
+        "creditCard": null,
+        "agency": null,
+        "transactions": null,
+        "customers": null
+    }
+}
+```
+
+### 13. Excluir uma conta
+
+- **Endpoint**: DELETE /api/accounts/{number}
+- **Descrição**: Remove uma conta transferindo-a para uma tabela de contas deletadas
+- **Parâmetros**:
+    - **number**: string
+- **Exemplo de resposta**:
+```json
+{
+    "number": "077998",
+    "restriction": false,
+    "overdraft": 500,
+    "profile": 1,
+    "creationDate": "2024-06-26T12:10:15.278917",
+    "balance": 600,
+    "savingsAccount": null
 }
 ```
