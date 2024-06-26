@@ -81,14 +81,31 @@ namespace UPBank.Accounts.Services
             };
         }
 
-        public async Task<IEnumerable<Transaction>> GetActiveLoans()
+        public async Task<IEnumerable<Transaction>> GetActiveLoansFromAgency(string number)
         {
-            return await _context.Transaction
+            var transactions = await _context.Transaction
                 .Where(
                     transaction => transaction.Type == EType.Loan &&
                     transaction.EffectiveDate <= DateTime.Now
                 )
                 .ToListAsync();
+
+            var transactionsFromAgency = new List<Transaction>();
+
+            transactions.ForEach(transaction =>
+            {
+                var account = _accountService.GetRaw(transaction.OriginNumber).Result;
+
+                if (account == null)
+                    return;
+
+                transaction.Origin = account;
+
+                if (account.AgencyNumber == number)
+                    transactionsFromAgency.Add(transaction);
+            });
+
+            return transactionsFromAgency;
         }
     }
 }

@@ -8,12 +8,12 @@ namespace UPBank.Agencies.APIs.AccountsAPI
 {
     public class AccountService : IAccountService
     {
-        private readonly string _Account = "https://localhost:5001/api/Accounts/";
+        private readonly string _Account = "https://localhost:7193/api/Accounts/";
 
         public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber)
         {
             using var client = new HttpClient();
-            var response = await client.GetAsync(_Account + agencyNumber + "/restricteds");
+            var response = await client.GetAsync(_Account + agencyNumber + "/restricted");
 
             return await ApiUtils<IEnumerable<Account>>.GetObjectFromResponse(response) ?? new List<Account>();
         }
@@ -29,7 +29,7 @@ namespace UPBank.Agencies.APIs.AccountsAPI
         public async Task<IEnumerable<Account>> GetAccountsWithActiveOverdraft(string agencyNumber)
         {
             using var client = new HttpClient();
-            var response = await client.GetAsync(_Account + agencyNumber + "/overdraft");
+            var response = await client.GetAsync(_Account + agencyNumber + "/activeloans");
 
             return await ApiUtils<IEnumerable<Account>>.GetObjectFromResponse(response) ?? new List<Account>();
         }
