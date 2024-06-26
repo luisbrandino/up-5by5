@@ -329,5 +329,7 @@ namespace UPBank.Accounts.Services
         }
 
         public bool Exists(string number) => (_context.Account?.Any(a => a.Number == number)).GetValueOrDefault();
+
+        public bool CustomerHasAccount(string cpf) => (_context.AccountCustomer?.Any(c => c.CustomerCpf == cpf)).GetValueOrDefault();
     }
 }

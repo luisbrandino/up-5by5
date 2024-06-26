@@ -131,10 +131,78 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
             Assert.Equal(3, await context.CreditCard.CountAsync());
+        }
 
-            var creditCards = await context.CreditCard.ToListAsync();
+        [Fact]
+        public async Task Post_CustomerAlreadyHasAccount_ReturnsBadRequest()
+        {
+            var controller = Make();
 
-            Assert.Equal(1, 1);
+            var accountCreationDTO = new AccountCreationDTO
+            {
+                Overdraft = 2000,
+                Profile = Enums.EProfile.Normal,
+                AgencyNumber = "10001",
+                Customers = new List<string> { "000.000.000-01" }
+            };
+
+            var createdResult = await controller.Post(accountCreationDTO);
+
+            var createdAccount = Assert.IsType<Account>(createdResult.Value);
+            Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
+            Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(3, await context.Account.CountAsync());
+            Assert.Equal(1, await context.AccountCustomer.CountAsync());
+            Assert.Equal(3, await context.CreditCard.CountAsync());
+
+            createdResult = await controller.Post(accountCreationDTO);
+
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(createdResult.Result);
+            var badRequestMessage = badRequestResult.Value;
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Equal("Cliente já possui conta", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_CustomerWithRegisteredAccountCanBeOneOfTheSecondaryCustomersOfAnAccount_ReturnsAccountCreated()
+        {
+            var controller = Make();
+
+            var accountCreationDTO = new AccountCreationDTO
+            {
+                Overdraft = 2000,
+                Profile = Enums.EProfile.Normal,
+                AgencyNumber = "10001",
+                Customers = new List<string> { "000.000.000-01" }
+            };
+
+            var createdResult = await controller.Post(accountCreationDTO);
+
+            var createdAccount = Assert.IsType<Account>(createdResult.Value);
+            Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
+            Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
+            var context = new UPBankAccountsContext(_options);
+            Assert.Equal(3, await context.Account.CountAsync());
+            Assert.Equal(1, await context.AccountCustomer.CountAsync());
+            Assert.Equal(3, await context.CreditCard.CountAsync());
+
+            accountCreationDTO = new AccountCreationDTO
+            {
+                Overdraft = 2000,
+                Profile = Enums.EProfile.Normal,
+                AgencyNumber = "10001",
+                Customers = new List<string> { "000.000.000-04", "000.000.000-01" }
+            };
+
+            createdResult = await controller.Post(accountCreationDTO);
+
+            createdAccount = Assert.IsType<Account>(createdResult.Value);
+            Assert.Equal(accountCreationDTO.Profile, createdAccount.Profile);
+            Assert.Equal(accountCreationDTO.AgencyNumber, createdAccount.AgencyNumber);
+            Assert.Equal(4, await context.Account.CountAsync());
+            Assert.Equal(3, await context.AccountCustomer.CountAsync());
+            Assert.Equal(4, await context.CreditCard.CountAsync());
         }
 
         [Fact]
