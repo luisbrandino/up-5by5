@@ -33,7 +33,6 @@ namespace UPBank.Accounts.Controllers
             _transactionService = transactionService;
         }
 
-        // GET: api/Accounts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
         {
@@ -65,33 +64,134 @@ namespace UPBank.Accounts.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(string id, Account account)
+        [HttpGet("restricted")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetRestrictedAccounts()
         {
-            if (id != account.Number)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(account).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                return (await _service.GetRestrictedAccounts()).ToList();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!AccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(e.Message);
             }
+        }
 
-            return NoContent();
+        [HttpGet("profile/{profile}")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsByProfile(EProfile profile)
+        {
+            try
+            {
+                return (await _service.GetAccountsByProfile(profile)).ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("activeloans")]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccountsWithActiveLoan()
+        {
+            try
+            {
+                return (await _service.GetAccountsWithActiveLoan()).ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{number}/transactions/{type}")]
+        public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactionsByType(string number, int type)
+        {
+            var transactionType = (EType)type;
+            try
+            {
+                var transactions = await _service.GetTransactionsByType(number, transactionType);
+
+                if (transactions == null)
+                    return NotFound();
+
+                return transactions.ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{number}/statement")]
+        public async Task<ActionResult<IEnumerable<Transaction>>> GetAccountStatement(string number)
+        {
+            try
+            {
+                var transactions = await _service.GetStatement(number);
+
+                if (transactions == null)
+                    return NotFound();
+
+                return transactions.ToList();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{number}/balance")]
+        public async Task<ActionResult<Dictionary<string, double>>> GetBalance(string number)
+        {
+            try
+            {
+                var account = await _service.GetRaw(number);
+
+                if (account == null)
+                    return NotFound();
+
+                return new Dictionary<string, double> { { "Balance", account.Balance } };
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{number}")]
+        public async Task<ActionResult<Account>> PutAccount(string number, UpdateAccountDTO account)
+        {
+            try
+            {
+                var updatedAccount = await _service.Update(number, account);
+
+                if (updatedAccount == null)
+                    return NotFound();
+
+                return updatedAccount;
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{number}/profile")]
+        public async Task<ActionResult<Account>> ChangeProfile(string number, ChangeProfileDTO profile)
+        {
+            try
+            {
+                var account = await _service.ChangeProfile(number, profile.Profile);
+
+                if (account == null)
+                    return NotFound();
+
+                return account;
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost]
@@ -101,6 +201,24 @@ namespace UPBank.Accounts.Controllers
             {
                 return await _service.Create(requestedAccount);
             } 
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("{number}/activate")]
+        public async Task<ActionResult<Account>> Activate(string number)
+        {
+            try
+            {
+                var account = await _service.Activate(number);
+
+                if (account == null)
+                    return NotFound();
+
+                return account;
+            }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
@@ -121,7 +239,7 @@ namespace UPBank.Accounts.Controllers
         }
 
         [HttpPost("{number}/transactions")]
-        [ServiceFilter(typeof(PopulateOriginNumberActionFilter))]
+        [ServiceFilter(typeof(AddNumberOriginToTransactionFilter), Order = int.MinValue)]
         public async Task<ActionResult<Transaction>> MakeTransaction(TransactionCreationDTO requestedTransaction)
         {
             try

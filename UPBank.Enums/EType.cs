@@ -2,10 +2,10 @@
 {
     public enum EType
     {
-        Withdraw,
-        Deposit,
-        Loan,
-        Transfer,
-        Payment
+        Withdraw = 1,
+        Deposit = 2,
+        Loan = 3,
+        Transfer = 4,
+        Payment = 5
     }
 }

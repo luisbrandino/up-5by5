@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using UPBank.Accounts.Api.Agency;
 using UPBank.Accounts.Api.Agency.Abstract;
 using UPBank.Accounts.Api.Customer;
 using UPBank.Accounts.Api.Customer.Abstract;
 using UPBank.Accounts.Data;
+using UPBank.Accounts.Filters;
 using UPBank.Accounts.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<UPBankAccountsContext>(options =>
@@ -16,12 +18,14 @@ builder.Services.AddControllers();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+builder.Services.AddScoped<AddNumberOriginToTransactionFilter>();
+
 builder.Services.AddSingleton<ICustomerApi, MockCustomerApi>();
 builder.Services.AddSingleton<IAgencyApi, MockAgencyApi>();
 
-builder.Services.AddScoped<AccountService>();
-builder.Services.AddScoped<CreditCardService>();
-builder.Services.AddScoped<TransactionService>();
+builder.Services.AddTransient<AccountService>();
+builder.Services.AddTransient<CreditCardService>();
+builder.Services.AddTransient<TransactionService>();
 
 var app = builder.Build();
 

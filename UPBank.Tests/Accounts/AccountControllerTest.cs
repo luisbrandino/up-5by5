@@ -8,6 +8,7 @@ using UPBank.Accounts.Data;
 using UPBank.Accounts.DTO;
 using UPBank.Accounts.Services;
 using UPBank.DTOs;
+using UPBank.Enums;
 using UPBank.Models;
 
 namespace UPBank.Tests.Accounts
@@ -35,6 +36,22 @@ namespace UPBank.Tests.Accounts
                 CreditCardNumber = 2020,
                 Balance = 2000,
                 Restriction = true
+            });
+
+            context.Transaction.Add(new Transaction
+            {
+                Value = 100,
+                OriginNumber = "123456789",
+                EffectiveDate = DateTime.UtcNow,
+                Type = Enums.EType.Deposit
+            });
+
+            context.Transaction.Add(new Transaction
+            {
+                Value = 120,
+                OriginNumber = "123456789",
+                EffectiveDate = DateTime.UtcNow,
+                Type = Enums.EType.Withdraw
             });
 
             context.CreditCard.Add(new CreditCard
@@ -114,6 +131,10 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(3, await context.Account.CountAsync());
             Assert.Equal(1, await context.AccountCustomer.CountAsync());
             Assert.Equal(3, await context.CreditCard.CountAsync());
+
+            var creditCards = await context.CreditCard.ToListAsync();
+
+            Assert.Equal(1, 1);
         }
 
         [Fact]
@@ -408,7 +429,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
         }
 
         [Fact]
@@ -554,7 +575,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
             Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
             Assert.Equal(2111, (await context.Account.FindAsync("505020")).Balance);
         }
@@ -578,7 +599,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
             Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
         }
 
@@ -601,7 +622,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
             Assert.Equal(3000, (await context.Account.FindAsync("123456789")).Balance);
         }
 
@@ -624,7 +645,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
             Assert.Equal(1000, (await context.Account.FindAsync("123456789")).Balance);
         }
 
@@ -647,7 +668,7 @@ namespace UPBank.Tests.Accounts
             Assert.Equal(transactionCreationDto.Value, createdTransaction.Value);
             Assert.Equal(transactionCreationDto.OriginNumber, createdTransaction.OriginNumber);
             var context = new UPBankAccountsContext(_options);
-            Assert.Equal(1, await context.Transaction.CountAsync());
+            Assert.Equal(3, await context.Transaction.CountAsync());
             Assert.Equal(3000, (await context.Account.FindAsync("123456789")).Balance);
         }
 
@@ -675,6 +696,30 @@ namespace UPBank.Tests.Accounts
             var badRequestMessage = badRequestResult.Value;
             Assert.Equal(400, badRequestResult.StatusCode);
             Assert.Equal("Cartão de crédito já está ativado", badRequestMessage);
+        }
+
+        [Fact]
+        public async Task Post_ActivateAccount_ReturnsActivatedAccount()
+        {
+            var controller = Make();
+
+            var activatedResult = await controller.Activate("123456789");
+
+            var activatedAccount = Assert.IsType<Account>(activatedResult.Value);
+            Assert.False(activatedAccount.Restriction);
+            var context = new UPBankAccountsContext(_options);
+            Assert.False((await context.Account.FindAsync("123456789")).Restriction);
+        }
+
+        [Fact]
+        public async Task Post_ActivateAccountNotInDatabase_ReturnsNotFound()
+        {
+            var controller = Make();
+
+            var activatedResult = await controller.Activate("123456dd789");
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(activatedResult.Result);
+            Assert.Equal(404, notFoundResult.StatusCode);
         }
 
         [Fact]
@@ -725,6 +770,57 @@ namespace UPBank.Tests.Accounts
         }
 
         [Fact]
+        public async Task Get_TransactionsFromAccount_ReturnsTransactions()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetTransactionsByType("123456789", (int)EType.Deposit);
+
+            var transactions = Assert.IsType<List<Transaction>>(accountResult.Value);
+            Assert.Equal(1, transactions.Count);
+            Assert.Equal("123456789", transactions.FirstOrDefault()?.OriginNumber);
+            Assert.Equal(100, transactions.FirstOrDefault()?.Value);
+            Assert.Equal(EType.Deposit, transactions.FirstOrDefault()?.Type);
+        }
+
+        [Fact]
+        public async Task Get_TransactionsFromAccountWithNoTransactions_ReturnsEmptyTransactionList()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetTransactionsByType("123456789", (int)EType.Loan);
+
+            var transactions = Assert.IsType<List<Transaction>>(accountResult.Value);
+            Assert.Equal(0, transactions.Count);
+        }
+
+        [Fact]
+        public async Task Get_TransactionsFromAccountNotInDatabase_ReturnsNotFound()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetTransactionsByType("3493290", (int)EType.Deposit);
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(accountResult.Result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Get_AccountStatement_ReturnsAllTransactions()
+        {
+            var controller = Make();
+
+            var accountResult = await controller.GetAccountStatement("123456789");
+
+            var transactions = Assert.IsType<List<Transaction>>(accountResult.Value);
+            Assert.Equal(2, transactions.Count);
+            Assert.Equal("123456789", transactions.FirstOrDefault()?.OriginNumber);
+            Assert.Equal(100, transactions.FirstOrDefault()?.Value);
+            Assert.Equal(EType.Deposit, transactions.FirstOrDefault()?.Type);
+            Assert.Equal(EType.Withdraw, transactions[1]?.Type);
+        }
+
+        [Fact]
         public async Task Delete_Account_ShouldInsertIntoDeletedAccountTable()
         {
             var controller = Make();
@@ -733,7 +829,6 @@ namespace UPBank.Tests.Accounts
 
             var deletedAccount = Assert.IsType<DeletedAccount>(deletedAccountResult.Value);
             Assert.Equal("123456789", deletedAccount.Number);
-
 
             var context = new UPBankAccountsContext(_options);
             Assert.Equal(1, await context.DeletedAccount.CountAsync());

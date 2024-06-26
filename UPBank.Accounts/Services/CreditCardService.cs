@@ -2,6 +2,8 @@
 using UPBank.Models;
 using Microsoft.EntityFrameworkCore;
 using UPBank.Accounts.Specifications;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 
 namespace UPBank.Accounts.Services
 {
@@ -10,19 +12,37 @@ namespace UPBank.Accounts.Services
         public long Generate();
     }
 
-    internal class VisaCreditCardNumber : ICreditCardNumberGenerator
+    internal abstract class BaseCreditCardNumber : ICreditCardNumberGenerator
     {
-        public long Generate()
+        public abstract long Generate();
+
+        public long GenerateNumberSequence(int length)
         {
-            return 4;
+            string sequence = "";
+
+            while (sequence.Length < length)
+                sequence += new Random().Next(0, 10).ToString();
+
+            return long.Parse(sequence);
+        }
+
+    }
+
+    internal class VisaCreditCardNumber : BaseCreditCardNumber
+    {
+        public override long Generate()
+        {
+            return long.Parse($"{4}{GenerateNumberSequence(13)}");
         }
     }
 
-    internal class MasterCardCreditCardNumber : ICreditCardNumberGenerator
+    internal class MasterCardCreditCardNumber : BaseCreditCardNumber
     {
-        public long Generate()
+        public override long Generate()
         {
-            return 5;
+            string[] prefixes = { "51", "52", "53", "54", "55" };
+            string prefix = prefixes[new Random().Next(prefixes.Length)];
+            return long.Parse($"{prefix}{GenerateNumberSequence(16)}");
         }
     }
 
@@ -78,5 +98,6 @@ namespace UPBank.Accounts.Services
             return creditCard;
         }
 
+        public async Task<CreditCard?> Get(long creditCardNumber) => await _context.CreditCard.FindAsync(creditCardNumber);
     }
 }

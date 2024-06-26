@@ -1,4 +1,5 @@
-﻿using UPBank.Accounts.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using UPBank.Accounts.Data;
 using UPBank.Accounts.Operations;
 using UPBank.Accounts.Operations.Abstract;
 using UPBank.Accounts.Specifications;
@@ -78,6 +79,16 @@ namespace UPBank.Accounts.Services
                 EType.Withdraw => new DebitTransactionOperation(),
                 EType.Payment => new DebitTransactionOperation()
             };
+        }
+
+        public async Task<IEnumerable<Transaction>> GetActiveLoans()
+        {
+            return await _context.Transaction
+                .Where(
+                    transaction => transaction.Type == EType.Loan &&
+                    transaction.EffectiveDate <= DateTime.Now
+                )
+                .ToListAsync();
         }
     }
 }
