@@ -22,12 +22,10 @@ namespace UPBank.Agencies.Services
             _accountService = accountService;
         }
 
-        public async Task<Agency> FillData(Agency agency)
+        public async void FillData(Agency agency)
         {
             agency.Employees = await _employeeService.GetEmployeesByAgencyNumber(agency.Number);
             agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode)?? new();
-
-            return agency;
         }
 
         public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);
