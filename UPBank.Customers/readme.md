@@ -93,7 +93,9 @@
         "Salary": 12000.00,
         "Phone": "(16)98839-6290",
         "Email": "Claudio@example.com",
-        "Address": "15990-640"
+        "Address": "14807-031",
+         "AddressNumber": 300
+        
 
     }
     ```
@@ -109,8 +111,8 @@
     "phone": "16988396290",
     "email": "Claudio@example.com",
     "address": {
-        "zipcode": "15990-640",
-        "number": 5,
+        "zipcode": "14807-031",
+        "number": 300,
         "complement": "",
         "street": "Avenida Siqueira Campos",
         "city": "Matão",
@@ -135,7 +137,7 @@
         "Phone": "(16)98839-6290",
         "Email": "Claudio@example.com",
         "Address": "15990-640"
-
+        "AddresNumber": 500
     }
     ```
 - **Exemplo de Resposta**:
