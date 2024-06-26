@@ -247,14 +247,14 @@ namespace UPBank.Employees.Controllers
                 string jsonContent = JsonConvert.SerializeObject(account);
                 HttpContent content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await client.PutAsync($"{_accountEndPoint}api/accounts/{bodyAccount.AccountNumber}/profile", content);
+                HttpResponseMessage response = await client.PutAsync($"{_accountEndPoint}/api/accounts/{bodyAccount.AccountNumber}/profile", content);
                 response.EnsureSuccessStatusCode();
             }
             if (employee.Manager == true && op == "ApproveAccount")
             {
                 account.Restriction = !account.Restriction;
 
-                var newAccount = await ApiConsume<Account>.Post(_accountEndPoint, $"api/accounts/{bodyAccount.AccountNumber}/activate", null);
+                var newAccount = await ApiConsume<Account>.Post(_accountEndPoint, $"/api/accounts/{bodyAccount.AccountNumber}/activate", null);
 
             }
 
