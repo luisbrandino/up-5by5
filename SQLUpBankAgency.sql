@@ -1,4 +1,4 @@
-USE DBAgency
+USE DBAgency;
 
 CREATE TABLE [Deleted] (
           [Number] nvarchar(450) NOT NULL,
