@@ -101,10 +101,19 @@ namespace UPBank.Tests.Agencies
                 var result = controller.GetAgency("123").Result;
 
                 var agency = result.Value;
+
                 agency.Cnpj = "12345678901234";
                 agency.Restriction = true;
 
-                _ = controller.PutAgency("123", agency);
+                var dto = new AgencyPutDTO()
+                {
+                    Number = agency.Number,
+                    Cnpj = agency.Cnpj,
+                    Restriction = agency.Restriction,
+                    AddressZipcode = agency.Address.Zipcode
+                };
+
+                _ = controller.PutAgency(dto);
 
                 var resultUpdated = controller.GetAgency("123").Result;
 

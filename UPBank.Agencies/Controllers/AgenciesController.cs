@@ -106,11 +106,19 @@ namespace UPBank.Agencies.Controllers
             }
         }
 
-        [HttpPut("{agencyNumber}")]
-        public async Task<IActionResult> PutAgency(string agencyNumber, Agency agency)
+        [HttpPut]
+        public async Task<IActionResult> PutAgency(AgencyPutDTO dto)
         {
-            if (agencyNumber != agency.Number)
-                return BadRequest();
+            var agency = _context.Agency.FirstOrDefault(a => a.Number == dto.Number);
+
+            if (agency == null)
+                return NotFound();
+
+            agency.Cnpj = dto.Cnpj;
+            agency.Restriction = dto.Restriction;
+            agency.AddressZipcode = dto.AddressZipcode;
+            agency.Address = _agencyService.GetAddress(new AddressDTO { Zipcode = dto.AddressZipcode, Number = 0, Complement = " " }).Result;
+            agency.Employees = _agencyService.GetEmployeesByAgencyNumber(agency.Number).Result.ToList();
 
             try
             {
@@ -129,7 +137,7 @@ namespace UPBank.Agencies.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AgencyExists(agencyNumber))
+                if (!AgencyExists(dto.Number))
                     return NotFound();
 
                 else

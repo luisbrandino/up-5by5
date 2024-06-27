@@ -28,6 +28,8 @@ namespace UPBank.Agencies.Services
             agency.Address = await _addressService.GetAddressByZipcode(agency.AddressZipcode)?? new();
         }
 
+        public async Task<IEnumerable<Employee>> GetEmployeesByAgencyNumber(string agencyNumber) => await _employeeService.GetEmployeesByAgencyNumber(agencyNumber);
+
         public async Task<IEnumerable<Account>> GetRestrictedAccounts(string agencyNumber) => await _accountService.GetRestrictedAccounts(agencyNumber);
 
         public async Task<IEnumerable<Account>> GetAccountsByProfile(string agencyNumber, EProfile profile) => await _accountService.GetAccountsByProfile(agencyNumber, profile);
