@@ -171,9 +171,10 @@
 
 ### 4. Listar todas as contas
 
-- **Endpoint**: GET /api/accounts/profile/{profile}
+- **Endpoint**: GET /api/accounts/agency/{number}/profile/{profile}
 - **Descrição**: Retorna todas as contas com base no perfil.
 - **Parâmetros**:
+    - **number**: string
     - **profile**: number (1 até 3)
         - 1. Universitary;
         - 2. Normal;
@@ -222,9 +223,10 @@
 
 ### 5. Listar contas com empréstimos ativos
 
-- **Endpoint**: GET /api/accounts/activeloans
+- **Endpoint**: GET /api/agency/{number}/accounts/activeloans
 - **Descrição**: Retorna todas as contas que possuem empréstimos ativos.
-- **Parâmetros**: Nenhum.
+- **Parâmetros**:
+    - **number**: string
 - **Exemplo de resposta**:
 ```json
 [

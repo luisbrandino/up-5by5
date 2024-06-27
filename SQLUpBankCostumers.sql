@@ -1,4 +1,6 @@
-USE DBCustumersAPI
+CREATE DATABASE DBCustumersAPI;
+
+USE DBCustumersAPI;
 
 CREATE TABLE Customer (
     Cpf VARCHAR(11) PRIMARY KEY,
